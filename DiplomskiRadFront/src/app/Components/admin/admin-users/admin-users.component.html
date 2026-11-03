@@ -1,0 +1,598 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-users text-primary mr-2"></i>Users
+          </h5>
+          <button class="btn btn-primary btn-sm" (click)="toggleCreateForm()">
+            <i
+              class="fas"
+              [ngClass]="showCreateForm ? 'fa-times' : 'fa-plus'"
+            ></i>
+            {{ showCreateForm ? " Cancel" : " Add user" }}
+          </button>
+        </div>
+
+        <div class="card-body" *ngIf="showCreateForm">
+          <p class="text-muted small">
+            No password is set here - the new user will get a link by email to
+            choose their own password.
+          </p>
+          <form [formGroup]="createForm" (ngSubmit)="createUser()" novalidate>
+            <div class="form-row">
+              <div class="form-group col-md-3">
+                <input
+                  class="form-control"
+                  placeholder="First name"
+                  formControlName="firstName"
+                  [class.is-invalid]="
+                    createForm.get('firstName')?.invalid &&
+                    createForm.get('firstName')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('firstName')?.invalid &&
+                    createForm.get('firstName')?.touched
+                  "
+                >
+                  First name is required.
+                </div>
+              </div>
+              <div class="form-group col-md-3">
+                <input
+                  class="form-control"
+                  placeholder="Last name"
+                  formControlName="lastName"
+                  [class.is-invalid]="
+                    createForm.get('lastName')?.invalid &&
+                    createForm.get('lastName')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('lastName')?.invalid &&
+                    createForm.get('lastName')?.touched
+                  "
+                >
+                  Last name is required.
+                </div>
+              </div>
+              <div class="form-group col-md-3">
+                <input
+                  class="form-control"
+                  placeholder="Email"
+                  formControlName="email"
+                  maxlength="100"
+                  [class.is-invalid]="
+                    createForm.get('email')?.invalid &&
+                    createForm.get('email')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('email')?.invalid &&
+                    createForm.get('email')?.touched
+                  "
+                >
+                  {{
+                    createForm.get("email")?.errors?.["required"]
+                      ? "Email is required."
+                      : createForm.get("email")?.errors?.["maxlength"]
+                        ? "Email can have at most 100 characters."
+                        : "Enter a valid email address."
+                  }}
+                </div>
+              </div>
+              <div class="form-group col-md-3">
+                <input
+                  class="form-control"
+                  placeholder="Username"
+                  formControlName="userName"
+                  [class.is-invalid]="
+                    createForm.get('userName')?.invalid &&
+                    createForm.get('userName')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('userName')?.invalid &&
+                    createForm.get('userName')?.touched
+                  "
+                >
+                  Username is required.
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-3">
+                <input
+                  class="form-control"
+                  placeholder="Address"
+                  formControlName="address"
+                  [class.is-invalid]="
+                    createForm.get('address')?.invalid &&
+                    createForm.get('address')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('address')?.invalid &&
+                    createForm.get('address')?.touched
+                  "
+                >
+                  Address is required.
+                </div>
+              </div>
+              <div class="form-group col-md-2">
+                <input
+                  class="form-control"
+                  placeholder="City"
+                  formControlName="city"
+                  [class.is-invalid]="
+                    createForm.get('city')?.invalid &&
+                    createForm.get('city')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('city')?.invalid &&
+                    createForm.get('city')?.touched
+                  "
+                >
+                  City is required.
+                </div>
+              </div>
+              <div class="form-group col-md-2">
+                <input
+                  class="form-control"
+                  placeholder="Postal code"
+                  formControlName="postalCode"
+                  [class.is-invalid]="
+                    createForm.get('postalCode')?.invalid &&
+                    createForm.get('postalCode')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('postalCode')?.invalid &&
+                    createForm.get('postalCode')?.touched
+                  "
+                >
+                  Postal code is required.
+                </div>
+              </div>
+              <div class="form-group col-md-2">
+                <input
+                  class="form-control"
+                  placeholder="Country"
+                  formControlName="country"
+                  [class.is-invalid]="
+                    createForm.get('country')?.invalid &&
+                    createForm.get('country')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('country')?.invalid &&
+                    createForm.get('country')?.touched
+                  "
+                >
+                  Country is required.
+                </div>
+              </div>
+              <div class="form-group col-md-3">
+                <select
+                  class="form-control"
+                  formControlName="role"
+                  title="Role of the new account"
+                >
+                  <option [ngValue]="2">Role: User</option>
+                  <option [ngValue]="1">Role: Administrator</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-success" type="submit" [disabled]="creating">
+              <span
+                *ngIf="creating"
+                class="spinner-border spinner-border-sm mr-1"
+              ></span>
+              Create &amp; invite
+            </button>
+          </form>
+
+          <div class="alert alert-info mt-3" *ngIf="lastInvite">
+            <div>
+              <strong>{{ lastInvite.email }}</strong> was created.
+            </div>
+            <div *ngIf="!lastInvite.emailSent" class="text-danger mb-1">
+              The invite email could not be delivered in this environment -
+              share this link manually:
+            </div>
+            <div class="d-flex align-items-center">
+              <code class="flex-grow-1 text-break">{{
+                lastInvite.resetLink
+              }}</code>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card-body border-top d-flex flex-wrap align-items-center justify-content-between"
+        >
+          <div class="input-group" style="max-width: 320px">
+            <input
+              class="form-control"
+              placeholder="Search by name or username"
+              [(ngModel)]="keyword"
+              (keyup.enter)="search()"
+            />
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" (click)="search()">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="custom-control custom-checkbox mt-2 mt-md-0">
+            <input
+              type="checkbox"
+              class="custom-control-input"
+              id="includeBlockedUsers"
+              [(ngModel)]="includeBlocked"
+              (change)="loadUsers()"
+            />
+            <label class="custom-control-label" for="includeBlockedUsers"
+              >Show blocked users</label
+            >
+          </div>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div class="alert alert-danger mx-3" *ngIf="errorMessage && !loading">
+          {{ errorMessage }}
+        </div>
+
+        <div
+          class="table-responsive position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="thead-light">
+              <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>Country</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let u of users">
+                <tr
+                  *ngIf="editingUserId !== u.id"
+                  [class.bg-light]="u.isBanned"
+                >
+                  <td>{{ u.id }}</td>
+                  <td>
+                    <div class="user-cell">
+                      <span class="user-avatar">
+                        <img
+                          *ngIf="u.avatarSrc; else noAvatar"
+                          [src]="u.avatarSrc"
+                          alt=""
+                        />
+                        <ng-template #noAvatar>
+                          <i
+                            class="fas fa-user-shield"
+                            *ngIf="u.role === 1; else userInitials"
+                          ></i>
+                        </ng-template>
+                        <ng-template #userInitials>{{
+                          initials(u)
+                        }}</ng-template>
+                      </span>
+                      <span>
+                        {{ u.firstName }} {{ u.lastName }}
+                        <span
+                          class="badge badge-secondary ml-1"
+                          *ngIf="u.isBanned"
+                          >Blocked</span
+                        >
+                        <span
+                          class="badge badge-info ml-1"
+                          *ngIf="u.role === 1"
+                          >Admin</span
+                        >
+                      </span>
+                    </div>
+                  </td>
+                  <td>{{ u.email }}</td>
+                  <td>{{ u.username }}</td>
+                  <td>{{ u.info?.address }}</td>
+                  <td>{{ u.info?.city }}</td>
+                  <td>{{ u.info?.country }}</td>
+                  <td class="text-right text-nowrap">
+                    <button
+                      class="btn btn-sm btn-outline-primary mr-1"
+                      (click)="startEdit(u)"
+                    >
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm"
+                      [ngClass]="
+                        u.isBanned
+                          ? 'btn-outline-success'
+                          : 'btn-outline-danger'
+                      "
+                      (click)="
+                        toggleBlockUser(
+                          u.id,
+                          u.firstName + ' ' + u.lastName,
+                          u.isBanned
+                        )
+                      "
+                    >
+                      <i
+                        class="fas"
+                        [ngClass]="u.isBanned ? 'fa-unlock' : 'fa-ban'"
+                      ></i>
+                      {{ u.isBanned ? " Unblock" : " Block" }}
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="editingUserId === u.id" class="table-light">
+                  <td colspan="8">
+                    <form
+                      [formGroup]="editForm"
+                      (ngSubmit)="saveEdit()"
+                      novalidate
+                    >
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label class="small text-muted mb-1"
+                            >First name</label
+                          >
+                          <input
+                            class="form-control"
+                            placeholder="First name"
+                            formControlName="firstName"
+                            [class.is-invalid]="
+                              editForm.get('firstName')?.invalid &&
+                              editForm.get('firstName')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('firstName')?.invalid &&
+                              editForm.get('firstName')?.touched
+                            "
+                          >
+                            First name is required.
+                          </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label class="small text-muted mb-1">Last name</label>
+                          <input
+                            class="form-control"
+                            placeholder="Last name"
+                            formControlName="lastName"
+                            [class.is-invalid]="
+                              editForm.get('lastName')?.invalid &&
+                              editForm.get('lastName')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('lastName')?.invalid &&
+                              editForm.get('lastName')?.touched
+                            "
+                          >
+                            Last name is required.
+                          </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label class="small text-muted mb-1">Email</label>
+                          <input
+                            class="form-control"
+                            placeholder="Email"
+                            formControlName="email"
+                            maxlength="100"
+                            [class.is-invalid]="
+                              editForm.get('email')?.invalid &&
+                              editForm.get('email')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('email')?.invalid &&
+                              editForm.get('email')?.touched
+                            "
+                          >
+                            {{
+                              editForm.get("email")?.errors?.["required"]
+                                ? "Email is required."
+                                : editForm.get("email")?.errors?.["maxlength"]
+                                  ? "Email can have at most 100 characters."
+                                  : "Enter a valid email address."
+                            }}
+                          </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label class="small text-muted mb-1">Username</label>
+                          <input
+                            class="form-control"
+                            placeholder="Username"
+                            formControlName="userName"
+                            [class.is-invalid]="
+                              editForm.get('userName')?.invalid &&
+                              editForm.get('userName')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('userName')?.invalid &&
+                              editForm.get('userName')?.touched
+                            "
+                          >
+                            Username is required.
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-3">
+                          <label class="small text-muted mb-1">Address</label>
+                          <input
+                            class="form-control"
+                            placeholder="Address"
+                            formControlName="address"
+                            [class.is-invalid]="
+                              editForm.get('address')?.invalid &&
+                              editForm.get('address')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('address')?.invalid &&
+                              editForm.get('address')?.touched
+                            "
+                          >
+                            Address is required.
+                          </div>
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label class="small text-muted mb-1">City</label>
+                          <input
+                            class="form-control"
+                            placeholder="City"
+                            formControlName="city"
+                            [class.is-invalid]="
+                              editForm.get('city')?.invalid &&
+                              editForm.get('city')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('city')?.invalid &&
+                              editForm.get('city')?.touched
+                            "
+                          >
+                            City is required.
+                          </div>
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label class="small text-muted mb-1"
+                            >Postal code</label
+                          >
+                          <input
+                            class="form-control"
+                            placeholder="Postal code"
+                            formControlName="postalCode"
+                            [class.is-invalid]="
+                              editForm.get('postalCode')?.invalid &&
+                              editForm.get('postalCode')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('postalCode')?.invalid &&
+                              editForm.get('postalCode')?.touched
+                            "
+                          >
+                            Postal code is required.
+                          </div>
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label class="small text-muted mb-1">Country</label>
+                          <input
+                            class="form-control"
+                            placeholder="Country"
+                            formControlName="country"
+                            [class.is-invalid]="
+                              editForm.get('country')?.invalid &&
+                              editForm.get('country')?.touched
+                            "
+                          />
+                          <div
+                            class="invalid-feedback"
+                            *ngIf="
+                              editForm.get('country')?.invalid &&
+                              editForm.get('country')?.touched
+                            "
+                          >
+                            Country is required.
+                          </div>
+                        </div>
+                        <div class="form-group col-md-3 d-flex align-items-end">
+                          <button
+                            class="btn btn-sm btn-success mr-1 mb-2"
+                            type="submit"
+                            [disabled]="saving"
+                          >
+                            <span
+                              *ngIf="saving"
+                              class="spinner-border spinner-border-sm mr-1"
+                            ></span
+                            >Save
+                          </button>
+                          <button
+                            class="btn btn-sm btn-secondary mb-2"
+                            type="button"
+                            (click)="cancelEdit()"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                      <p class="small text-muted mb-0">
+                        <i class="fas fa-info-circle mr-1"></i>Passwords can't
+                        be set here - the user changes their own via "Forgot
+                        password" on the login page.
+                      </p>
+                    </form>
+                  </td>
+                </tr>
+              </ng-container>
+              <tr *ngIf="users.length === 0">
+                <td colspan="8" class="text-center text-muted py-4">
+                  No users found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

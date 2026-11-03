@@ -1,0 +1,440 @@
+<div class="container-fluid bg-secondary mb-5 page-header">
+  <div
+    class="d-flex flex-column align-items-center justify-content-center"
+    style="min-height: 220px"
+  >
+    <h1 class="font-weight-semi-bold text-uppercase mb-3">My Profile</h1>
+    <div class="d-inline-flex">
+      <p class="m-0"><a routerLink="/home">Home</a></p>
+      <p class="m-0 px-2">-</p>
+      <p class="m-0">My Profile</p>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12">
+      <ul class="nav nav-tabs profile-tabs mb-4">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [class.active]="activeTab === 'general'"
+            href=""
+            (click)="$event.preventDefault(); selectTab('general')"
+          >
+            <i class="fas fa-user mr-1"></i> General
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="!isAdmin">
+          <a
+            class="nav-link"
+            [class.active]="activeTab === 'orders'"
+            href=""
+            (click)="$event.preventDefault(); selectTab('orders')"
+          >
+            <i class="fas fa-box mr-1"></i> My Orders
+          </a>
+        </li>
+      </ul>
+
+      <div *ngIf="activeTab === 'general'">
+        <div class="text-center py-5" *ngIf="!userDataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+        <div class="card shadow-sm" *ngIf="userDataLoaded && user">
+          <div class="card-header bg-white">
+            <h5 class="mb-0">
+              <i class="fas fa-id-card text-primary mr-2"></i>Account details
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="avatar-block">
+              <div class="avatar-preview">
+                <img
+                  *ngIf="avatarPreview; else avatarFallback"
+                  [src]="avatarPreview"
+                  alt="Your profile picture"
+                />
+                <ng-template #avatarFallback>
+                  <i
+                    class="fas fa-user-shield"
+                    *ngIf="isAdmin; else avatarInitials"
+                  ></i>
+                </ng-template>
+                <ng-template #avatarInitials>{{ initials }}</ng-template>
+              </div>
+              <div>
+                <h6 class="mb-1">Profile picture</h6>
+                <p class="text-muted small mb-2">
+                  Shown next to your name in the menu. JPG, PNG or WebP up to 2
+                  MB. Picture changes are applied when you click Save changes.
+                </p>
+                <label
+                  class="btn btn-outline-primary btn-sm mb-0 mr-2"
+                  [class.disabled]="saving"
+                >
+                  <i class="fas fa-camera mr-1"></i
+                  >{{ avatarPreview ? "Change picture" : "Choose picture" }}
+                  <input
+                    type="file"
+                    hidden
+                    accept=".jpg,.jpeg,.png,.webp"
+                    (change)="onAvatarSelected($event)"
+                    [disabled]="saving"
+                  />
+                </label>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm mr-2"
+                  *ngIf="avatarPreview"
+                  [disabled]="saving"
+                  (click)="removeAvatar()"
+                >
+                  Remove
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-link btn-sm"
+                  *ngIf="avatarModified"
+                  [disabled]="saving"
+                  (click)="resetAvatarChange()"
+                >
+                  Undo
+                </button>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-6 form-group">
+                <label class="text-muted small mb-1">Username</label>
+                <input disabled class="form-control" [value]="user.username" />
+              </div>
+              <div class="col-md-6 form-group">
+                <label class="text-muted small mb-1">E-mail</label>
+                <input disabled class="form-control" [value]="user.email" />
+              </div>
+            </div>
+            <p class="text-muted small">
+              Username and email can't be changed here.
+            </p>
+            <hr />
+            <form [formGroup]="editForm" (ngSubmit)="saveChanges()" novalidate>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label class="text-muted small mb-1">First Name</label>
+                  <input
+                    class="form-control"
+                    formControlName="firstName"
+                    [class.is-invalid]="
+                      editForm.get('firstName')?.invalid &&
+                      editForm.get('firstName')?.touched
+                    "
+                  />
+                  <div class="field-error text-danger">
+                    <span
+                      *ngIf="
+                        editForm.get('firstName')?.invalid &&
+                        editForm.get('firstName')?.touched
+                      "
+                      >First name is required.</span
+                    >
+                  </div>
+                </div>
+                <div class="col-md-6 form-group">
+                  <label class="text-muted small mb-1">Last Name</label>
+                  <input
+                    class="form-control"
+                    formControlName="lastName"
+                    [class.is-invalid]="
+                      editForm.get('lastName')?.invalid &&
+                      editForm.get('lastName')?.touched
+                    "
+                  />
+                  <div class="field-error text-danger">
+                    <span
+                      *ngIf="
+                        editForm.get('lastName')?.invalid &&
+                        editForm.get('lastName')?.touched
+                      "
+                      >Last name is required.</span
+                    >
+                  </div>
+                </div>
+                <div class="col-md-12 form-group">
+                  <label class="text-muted small mb-1">Address</label>
+                  <input
+                    class="form-control"
+                    formControlName="address"
+                    [class.is-invalid]="
+                      editForm.get('address')?.invalid &&
+                      editForm.get('address')?.touched
+                    "
+                  />
+                  <div class="field-error text-danger">
+                    <span
+                      *ngIf="
+                        editForm.get('address')?.invalid &&
+                        editForm.get('address')?.touched
+                      "
+                      >Address is required.</span
+                    >
+                  </div>
+                </div>
+                <div class="col-md-4 form-group">
+                  <label class="text-muted small mb-1">City</label>
+                  <input
+                    class="form-control"
+                    formControlName="city"
+                    [class.is-invalid]="
+                      editForm.get('city')?.invalid &&
+                      editForm.get('city')?.touched
+                    "
+                  />
+                  <div class="field-error text-danger">
+                    <span
+                      *ngIf="
+                        editForm.get('city')?.invalid &&
+                        editForm.get('city')?.touched
+                      "
+                      >City is required.</span
+                    >
+                  </div>
+                </div>
+                <div class="col-md-4 form-group">
+                  <label class="text-muted small mb-1">Postal Code</label>
+                  <input
+                    class="form-control"
+                    formControlName="postalCode"
+                    [class.is-invalid]="
+                      editForm.get('postalCode')?.invalid &&
+                      editForm.get('postalCode')?.touched
+                    "
+                  />
+                  <div class="field-error text-danger">
+                    <span
+                      *ngIf="
+                        editForm.get('postalCode')?.invalid &&
+                        editForm.get('postalCode')?.touched
+                      "
+                      >Postal code is required.</span
+                    >
+                  </div>
+                </div>
+                <div class="col-md-4 form-group">
+                  <label class="text-muted small mb-1">Country</label>
+                  <input
+                    class="form-control"
+                    formControlName="country"
+                    [class.is-invalid]="
+                      editForm.get('country')?.invalid &&
+                      editForm.get('country')?.touched
+                    "
+                  />
+                  <div class="field-error text-danger">
+                    <span
+                      *ngIf="
+                        editForm.get('country')?.invalid &&
+                        editForm.get('country')?.touched
+                      "
+                      >Country is required.</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-primary" type="submit" [disabled]="saving">
+                <span
+                  *ngIf="saving"
+                  class="spinner-border spinner-border-sm mr-1"
+                ></span
+                >Save changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'orders' && !isAdmin">
+        <div class="text-center py-5" *ngIf="!ordersLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div class="card shadow-sm" *ngIf="ordersLoaded && orders.length === 0">
+          <div class="card-body text-center text-muted">
+            <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+            You haven't placed any orders yet.
+          </div>
+        </div>
+
+        <ng-container *ngIf="ordersLoaded && orders.length > 0">
+          <div class="d-flex align-items-center mb-3">
+            <label class="mr-2 mb-0 text-muted small">Year:</label>
+            <select
+              class="form-control form-control-sm"
+              style="max-width: 140px"
+              [(ngModel)]="yearFilter"
+            >
+              <option value="all">All years</option>
+              <option *ngFor="let y of availableYears" [value]="y">
+                {{ y }}
+              </option>
+            </select>
+          </div>
+
+          <div class="card shadow-sm">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item" *ngFor="let order of filteredOrders">
+                <div
+                  class="d-flex flex-wrap align-items-center justify-content-between order-header"
+                  (click)="toggleExpand(order.receiptId)"
+                >
+                  <div class="d-flex align-items-center flex-grow-1">
+                    <i
+                      class="fas mr-2"
+                      [ngClass]="
+                        expandedOrderIds.has(order.receiptId)
+                          ? 'fa-chevron-down'
+                          : 'fa-chevron-right'
+                      "
+                    ></i>
+                    <div>
+                      <span class="font-weight-bold"
+                        >Order #{{ order.receiptId }}</span
+                      >
+                      <span class="text-muted ml-2">{{
+                        order.orderedAt | date: "medium"
+                      }}</span>
+                    </div>
+                  </div>
+                  <h6 class="mb-0">{{ order.total | price }}</h6>
+                </div>
+                <div
+                  class="table-responsive mt-3"
+                  *ngIf="expandedOrderIds.has(order.receiptId)"
+                >
+                  <table class="table table-sm mb-2">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Product</th>
+                        <th>Brand</th>
+                        <th>Category</th>
+                        <th>Gender</th>
+                        <th>Size</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Your Rating</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let item of order.items">
+                        <tr>
+                          <td style="width: 80px">
+                            <img
+                              *ngIf="item.picture"
+                              class="order-item-thumb"
+                              [src]="item.picture.src"
+                              [alt]="item.picture.alt"
+                            />
+                          </td>
+                          <td>
+                            <a routerLink="/product/{{ item.productId }}">{{
+                              item.productName
+                            }}</a>
+                          </td>
+                          <td>{{ item.brand }}</td>
+                          <td>{{ item.category }}</td>
+                          <td>{{ item.gender }}</td>
+                          <td>{{ item.size }}</td>
+                          <td>{{ item.quantity }}</td>
+                          <td>{{ item.price | price }}</td>
+                          <td>
+                            <span class="text-primary" *ngIf="item.myRating">
+                              <small
+                                *ngFor="let star of [1, 2, 3, 4, 5]"
+                                [ngClass]="starClass(star, item.myRating)"
+                              ></small>
+                              <small class="text-muted ml-1">{{
+                                item.myRating | number: "1.1-1"
+                              }}</small>
+                            </span>
+                            <a
+                              href=""
+                              class="small ml-1"
+                              *ngIf="!item.myRating"
+                              (click)="
+                                $event.preventDefault();
+                                startRating(order.receiptId, item)
+                              "
+                              >Rate</a
+                            >
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                  <div class="text-right">
+                    <p class="mb-0 text-muted" *ngIf="order.paymentMethodName">
+                      Payment method: {{ order.paymentMethodName }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                      Subtotal: {{ order.subtotal | price }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                      Shipping: {{ order.shippingFee | price }}
+                    </p>
+                    <p class="mb-0 text-success" *ngIf="order.couponCode">
+                      Coupon "{{ order.couponCode }}": -{{
+                        order.discountAmount | price
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rating-backdrop" *ngIf="ratingItem" (click)="cancelRating()">
+  <div class="rating-box" (click)="$event.stopPropagation()">
+    <h5 class="mb-3">Rate "{{ ratingItem.productName }}"</h5>
+    <div class="text-primary mb-2 star-pick-row" style="font-size: 1.5rem">
+      <span class="star-pick" *ngFor="let star of [1, 2, 3, 4, 5]">
+        <i [ngClass]="starClass(star, ratingValue)"></i>
+        <span class="star-half-click left" (click)="setRatingHalf(star)"></span>
+        <span
+          class="star-half-click right"
+          (click)="setRatingFull(star)"
+        ></span>
+      </span>
+    </div>
+    <p class="text-muted small mb-2" *ngIf="ratingValue">
+      Selected: {{ ratingValue | number: "1.1-1" }} / 5
+    </p>
+    <textarea
+      class="form-control mb-3"
+      rows="3"
+      placeholder="Optional comment"
+      [(ngModel)]="ratingComment"
+    ></textarea>
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-secondary mr-2" (click)="cancelRating()">
+        Cancel
+      </button>
+      <button
+        class="btn btn-primary"
+        [disabled]="ratingValue < 1 || submittingRating"
+        (click)="submitRating()"
+      >
+        <span
+          class="spinner-border spinner-border-sm mr-1"
+          *ngIf="submittingRating"
+        ></span
+        >Submit
+      </button>
+    </div>
+  </div>
+</div>

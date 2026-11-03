@@ -1,0 +1,132 @@
+<div class="container-fluid bg-secondary mb-5 page-header">
+  <div
+    class="d-flex flex-column align-items-center justify-content-center"
+    style="min-height: 300px"
+  >
+    <h1 class="font-weight-semi-bold text-uppercase mb-3">Order Confirmed</h1>
+    <div class="d-inline-flex">
+      <p class="m-0"><a routerLink="/home">Home</a></p>
+      <p class="m-0 px-2">-</p>
+      <p class="m-0">Order Confirmation</p>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid pb-5">
+  <div class="text-center py-5" *ngIf="!dataLoaded">
+    <span class="spinner-border text-primary"></span>
+  </div>
+
+  <div class="row px-xl-5" *ngIf="dataLoaded && errored">
+    <div class="col-12 text-center py-5">
+      <p class="text-muted">We couldn't load this order.</p>
+      <a routerLink="/home" class="btn btn-primary">Back to Home</a>
+    </div>
+  </div>
+
+  <div
+    class="row px-xl-5 justify-content-center"
+    *ngIf="dataLoaded && !errored && order"
+  >
+    <div class="col-lg-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white text-center py-4">
+          <i
+            class="fas fa-check-circle text-success"
+            style="font-size: 3rem"
+          ></i>
+          <h4 class="font-weight-semi-bold mt-3 mb-0">
+            Thank you for your order!
+          </h4>
+          <p class="text-muted mb-0">
+            A confirmation has been sent to your email.
+          </p>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between mb-4">
+            <div>
+              <p class="mb-1"><strong>Order #</strong>{{ order.receiptId }}</p>
+              <p class="mb-1">
+                <strong>Date:</strong> {{ order.orderedAt | date: "medium" }}
+              </p>
+              <p class="mb-1">
+                <strong>Ordered by:</strong> {{ order.customerName }} ({{
+                  order.customerEmail
+                }})
+              </p>
+              <p class="mb-0" *ngIf="order.paymentMethodName">
+                <strong>Payment method:</strong> {{ order.paymentMethodName }}
+              </p>
+            </div>
+            <div *ngIf="order.billingFirstName">
+              <p class="mb-1"><strong>Billing details</strong></p>
+              <p class="mb-0 text-muted">
+                {{ order.billingFirstName }} {{ order.billingLastName }}<br />
+                {{ order.billingAddress }}, {{ order.billingCity }}<br />
+                {{ order.billingCountry }}, {{ order.billingPostalCode }}<br />
+                {{ order.billingEmail }}
+              </p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Product</th>
+                  <th>Brand</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of order.items">
+                  <td style="width: 80px">
+                    <img
+                      *ngIf="item.picture"
+                      class="invoice-item-thumb"
+                      [src]="item.picture.src"
+                      [alt]="item.picture.alt"
+                    />
+                  </td>
+                  <td>
+                    <a routerLink="/product/{{ item.productId }}">{{
+                      item.productName
+                    }}</a>
+                  </td>
+                  <td>{{ item.brand }}</td>
+                  <td>{{ item.category }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.price | price }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-right">
+            <p class="mb-0 text-muted">
+              Subtotal: {{ order.subtotal | price }}
+            </p>
+            <p class="mb-0 text-muted">
+              Shipping: {{ order.shippingFee | price }}
+            </p>
+            <p class="mb-0 text-success" *ngIf="order.couponCode">
+              Coupon "{{ order.couponCode }}": -{{
+                order.discountAmount | price
+              }}
+            </p>
+            <h5 class="mt-2">Total: {{ order.total | price }}</h5>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent text-center py-3">
+          <a routerLink="/home" class="btn btn-outline-primary mr-2"
+            >Back to Home</a
+          >
+          <a routerLink="/orders" class="btn btn-primary">View My Orders</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

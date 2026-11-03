@@ -1,0 +1,152 @@
+.media-preview {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #16161d;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-preview img,
+.media-preview video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-preview.is-empty {
+  background: linear-gradient(135deg, #1b1b23, #2c2830);
+}
+
+.media-empty {
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 1rem;
+
+  i {
+    display: block;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+  }
+}
+
+.slide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+}
+
+.slide-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  transition:
+    box-shadow 0.25s var(--ease),
+    transform 0.25s var(--ease);
+
+  &:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+
+  &.is-inactive {
+    opacity: 0.62;
+  }
+}
+
+.slide-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #16161d;
+}
+
+.slide-thumb img,
+.slide-thumb video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.slide-thumb.is-empty {
+  background: linear-gradient(135deg, #1b1b23, #2c2830);
+}
+
+.slide-order {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(22, 22, 29, 0.78);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.slide-kind {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+}
+
+.slide-status {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.slide-body {
+  padding: 1rem 1.1rem 0.4rem;
+  flex: 1;
+
+  h6 {
+    font-weight: 700;
+  }
+}
+
+.slide-actions {
+  padding: 0.6rem 1.1rem 1.1rem;
+}
+
+.hero-form {
+  background: var(--surface-2);
+}
+
+.chip i {
+  font-size: 0.68rem;
+  color: var(--accent-600);
+}
+
+.slide-status.badge-success {
+  background: #2f9e6b;
+  color: #fff;
+}
+
+.slide-status.badge-secondary {
+  background: rgba(22, 22, 29, 0.8);
+  color: #fff;
+  border-color: transparent;
+}

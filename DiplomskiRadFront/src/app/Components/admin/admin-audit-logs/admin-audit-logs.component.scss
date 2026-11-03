@@ -1,0 +1,40 @@
+.user-filter {
+  max-width: 220px;
+}
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--primary);
+  }
+
+  i {
+    font-size: 0.8rem;
+    margin-left: 2px;
+  }
+}
+
+.result-filter {
+  max-width: 170px;
+}
+
+.data-cell {
+  max-width: 420px;
+  cursor: pointer;
+
+  code {
+    color: var(--ink-2);
+    word-break: break-all;
+  }
+}
+
+.data-full {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}

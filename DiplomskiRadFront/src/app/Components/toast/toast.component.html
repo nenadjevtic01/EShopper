@@ -1,0 +1,19 @@
+<div class="toast-container">
+  <div
+    *ngFor="let toast of toasts"
+    class="alert app-toast d-flex align-items-center"
+    [ngClass]="'alert-' + toast.type"
+    role="alert"
+  >
+    <i class="fas mr-2" [ngClass]="iconFor(toast.type)"></i>
+    <div class="flex-grow-1">{{ toast.message }}</div>
+    <button
+      type="button"
+      class="close ml-2"
+      aria-label="Close"
+      (click)="close(toast.id)"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+</div>

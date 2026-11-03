@@ -1,0 +1,205 @@
+<div class="container-fluid pt-5">
+  <div class="text-center mb-4">
+    <h2 class="section-title px-5"><span class="px-2">Register</span></h2>
+  </div>
+  <div class="row px-xl-5 justify-content-center">
+    <div class="col-lg-5 mb-5">
+      <div class="login-form">
+        <div *ngIf="errorMessage" class="text-danger mb-3">
+          {{ errorMessage }}
+        </div>
+        <form [formGroup]="registerForm" (ngSubmit)="register()" novalidate>
+          <div class="control-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="First name"
+              formControlName="firstName"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('firstName')?.invalid &&
+                  registerForm.get('firstName')?.touched
+                "
+                >First name is required.</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Last name"
+              formControlName="lastName"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('lastName')?.invalid &&
+                  registerForm.get('lastName')?.touched
+                "
+                >Last name is required.</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="email"
+              class="form-control"
+              placeholder="Email"
+              formControlName="email"
+              maxlength="100"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('email')?.invalid &&
+                  registerForm.get('email')?.touched
+                "
+                >{{
+                  registerForm.get("email")?.errors?.["maxlength"]
+                    ? "Email can have at most 100 characters."
+                    : "Valid email is required."
+                }}</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Username"
+              formControlName="userName"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('userName')?.invalid &&
+                  registerForm.get('userName')?.touched
+                "
+                >Username is required.</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="password"
+              class="form-control"
+              placeholder="Password"
+              formControlName="password"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('password')?.invalid &&
+                  registerForm.get('password')?.touched
+                "
+              >
+                Password must be at least 6 characters.
+              </span>
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="password"
+              class="form-control"
+              placeholder="Confirm password"
+              formControlName="confirmPassword"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('confirmPassword')?.touched &&
+                  (registerForm.get('confirmPassword')?.invalid ||
+                    registerForm.errors?.['passwordsMismatch'])
+                "
+                >{{
+                  registerForm.get("confirmPassword")?.invalid
+                    ? "Please confirm your password."
+                    : "Passwords do not match."
+                }}</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Address"
+              formControlName="address"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('address')?.invalid &&
+                  registerForm.get('address')?.touched
+                "
+                >Address is required.</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="City"
+              formControlName="city"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('city')?.invalid &&
+                  registerForm.get('city')?.touched
+                "
+                >City is required.</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Postal code"
+              formControlName="postalCode"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('postalCode')?.invalid &&
+                  registerForm.get('postalCode')?.touched
+                "
+                >Postal code is required.</span
+              >
+            </div>
+          </div>
+          <div class="control-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Country"
+              formControlName="country"
+            />
+            <div class="field-error text-danger">
+              <span
+                *ngIf="
+                  registerForm.get('country')?.invalid &&
+                  registerForm.get('country')?.touched
+                "
+                >Country is required.</span
+              >
+            </div>
+          </div>
+          <div>
+            <button class="btn btn-primary py-2 px-4" type="submit">
+              Register
+            </button>
+          </div>
+        </form>
+        <p class="mt-3">
+          Already have an account? <a routerLink="/login">Login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

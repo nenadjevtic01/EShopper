@@ -1,0 +1,187 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-receipt text-primary mr-2"></i>Orders
+          </h5>
+          <div class="d-flex align-items-center" style="gap: 1rem">
+            <div
+              class="d-flex align-items-center"
+              *ngIf="availableYears.length > 0"
+            >
+              <label class="mr-2 mb-0 text-muted small">Year:</label>
+              <select
+                class="form-control form-control-sm"
+                style="max-width: 130px"
+                [(ngModel)]="yearFilter"
+              >
+                <option value="all">All years</option>
+                <option *ngFor="let y of availableYears" [value]="y">
+                  {{ y }}
+                </option>
+              </select>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="includeInactiveOrders"
+                [(ngModel)]="includeInactive"
+                (change)="loadOrders()"
+              />
+              <label class="custom-control-label" for="includeInactiveOrders"
+                >Show deleted orders</label
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div
+          class="card-body"
+          *ngIf="dataLoaded && !loading && orders.length === 0"
+        >
+          <p class="text-muted mb-0">No orders yet.</p>
+        </div>
+
+        <div
+          class="list-group list-group-flush position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <div
+            class="list-group-item"
+            *ngFor="let order of filteredOrders"
+            [class.bg-light]="!order.isActive"
+          >
+            <div
+              class="d-flex flex-wrap align-items-center justify-content-between order-header"
+              (click)="toggleExpand(order.receiptId)"
+            >
+              <div class="d-flex align-items-center flex-grow-1">
+                <i
+                  class="fas mr-2"
+                  [ngClass]="
+                    expandedOrderIds.has(order.receiptId)
+                      ? 'fa-chevron-down'
+                      : 'fa-chevron-right'
+                  "
+                ></i>
+                <div>
+                  <span class="font-weight-bold"
+                    >Order #{{ order.receiptId }}</span
+                  >
+                  <span
+                    class="badge badge-secondary ml-2"
+                    *ngIf="!order.isActive"
+                    >Deleted</span
+                  >
+                  <span class="text-muted ml-2">{{
+                    order.orderedAt | date: "medium"
+                  }}</span>
+                  <div class="small text-muted">
+                    <i class="fas fa-user mr-1"></i
+                    >{{ order.customerName }} &lt;{{ order.customerEmail }}&gt;
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center">
+                <h6 class="mb-0 mr-3">{{ order.total | price }}</h6>
+                <button
+                  class="btn btn-sm"
+                  [ngClass]="
+                    order.isActive
+                      ? 'btn-outline-danger'
+                      : 'btn-outline-success'
+                  "
+                  (click)="
+                    $event.stopPropagation();
+                    deleteOrder(order.receiptId, order.isActive)
+                  "
+                >
+                  <i
+                    class="fas"
+                    [ngClass]="order.isActive ? 'fa-trash' : 'fa-undo'"
+                  ></i>
+                  {{ order.isActive ? "Delete" : "Restore" }}
+                </button>
+              </div>
+            </div>
+            <div
+              class="table-responsive mt-3"
+              *ngIf="expandedOrderIds.has(order.receiptId)"
+            >
+              <table class="table table-sm mb-2">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Gender</th>
+                    <th>Size</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of order.items">
+                    <td style="width: 80px">
+                      <img
+                        *ngIf="item.picture"
+                        class="order-item-thumb"
+                        [src]="item.picture.src"
+                        [alt]="item.picture.alt"
+                      />
+                    </td>
+                    <td>
+                      <a
+                        routerLink="/product/{{ item.productId }}"
+                        target="_blank"
+                        >{{ item.productName }}</a
+                      >
+                    </td>
+                    <td>{{ item.brand }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.gender }}</td>
+                    <td>{{ item.size }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price | price }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="text-right">
+                <p class="mb-0 text-muted" *ngIf="order.paymentMethodName">
+                  Payment method: {{ order.paymentMethodName }}
+                </p>
+                <p class="mb-0 text-muted">
+                  Subtotal: {{ order.subtotal | price }}
+                </p>
+                <p class="mb-0 text-muted">
+                  Shipping: {{ order.shippingFee | price }}
+                </p>
+                <p class="mb-0 text-success" *ngIf="order.couponCode">
+                  Coupon "{{ order.couponCode }}": -{{
+                    order.discountAmount | price
+                  }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

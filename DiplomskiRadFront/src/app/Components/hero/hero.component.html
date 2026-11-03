@@ -1,0 +1,109 @@
+<section class="hero-wrap">
+  <div
+    class="hero"
+    (mouseenter)="setHover(true)"
+    (mouseleave)="setHover(false)"
+    [class.hero-loading]="!loaded"
+  >
+    <ng-container *ngIf="slides.length > 0; else fallback">
+      <div
+        class="hero-slide"
+        *ngFor="let s of slides; let i = index"
+        [class.active]="i === index"
+        [attr.aria-hidden]="i !== index"
+      >
+        <div class="hero-media" [class.hero-media-empty]="!s.mediaSrc">
+          <ng-container *ngIf="s.mediaSrc && showMedia(i)">
+            <video
+              *ngIf="s.mediaType === 'video'"
+              [src]="s.mediaSrc"
+              autoplay
+              [muted]="true"
+              loop
+              playsinline
+              preload="metadata"
+            ></video>
+            <img
+              *ngIf="s.mediaType !== 'video'"
+              [src]="s.mediaSrc"
+              [alt]="s.title"
+            />
+          </ng-container>
+        </div>
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <span class="hero-tagline" *ngIf="s.tagline">{{ s.tagline }}</span>
+          <h1 class="hero-title">{{ s.title }}</h1>
+          <p class="hero-subtitle" *ngIf="s.subtitle">{{ s.subtitle }}</p>
+          <ng-container *ngIf="s.buttonText && s.buttonLink">
+            <a
+              *ngIf="!isExternal(s.buttonLink)"
+              class="hero-btn"
+              [routerLink]="linkPath(s.buttonLink)"
+              [queryParams]="linkQuery(s.buttonLink)"
+              [attr.tabindex]="i === index ? 0 : -1"
+            >
+              {{ s.buttonText }}<i class="fas fa-arrow-right"></i>
+            </a>
+            <a
+              *ngIf="isExternal(s.buttonLink)"
+              class="hero-btn"
+              [href]="s.buttonLink"
+              target="_blank"
+              rel="noopener"
+              [attr.tabindex]="i === index ? 0 : -1"
+            >
+              {{ s.buttonText }}<i class="fas fa-arrow-right"></i>
+            </a>
+          </ng-container>
+        </div>
+      </div>
+
+      <ng-container *ngIf="slides.length > 1">
+        <button
+          type="button"
+          class="hero-arrow hero-arrow-prev"
+          (click)="prev()"
+          aria-label="Previous slide"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button
+          type="button"
+          class="hero-arrow hero-arrow-next"
+          (click)="next()"
+          aria-label="Next slide"
+        >
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="hero-dots">
+          <button
+            type="button"
+            *ngFor="let s of slides; let i = index"
+            class="hero-dot"
+            [class.active]="i === index"
+            (click)="go(i)"
+            [attr.aria-label]="'Go to slide ' + (i + 1)"
+          ></button>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #fallback>
+      <div class="hero-slide active" *ngIf="loaded">
+        <div class="hero-media hero-media-empty"></div>
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <span class="hero-tagline">Welcome</span>
+          <h1 class="hero-title">Fashion that fits your everyday</h1>
+          <p class="hero-subtitle">
+            Browse the latest collection and find something you will love.
+          </p>
+          <a class="hero-btn" routerLink="/shop"
+            >Shop now<i class="fas fa-arrow-right"></i
+          ></a>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</section>

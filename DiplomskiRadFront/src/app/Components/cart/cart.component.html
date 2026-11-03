@@ -1,0 +1,121 @@
+<div class="container-fluid bg-secondary mb-5 page-header">
+  <div
+    class="d-flex flex-column align-items-center justify-content-center"
+    style="min-height: 300px"
+  >
+    <h1 class="font-weight-semi-bold text-uppercase mb-3">Shopping Cart</h1>
+    <div class="d-inline-flex">
+      <p class="m-0"><a routerLink="/home">Home</a></p>
+      <p class="m-0 px-2">-</p>
+      <p class="m-0">Shopping Cart</p>
+    </div>
+  </div>
+</div>
+
+<ng-container *ngIf="dataLoaded; else emptyCart">
+  <div class="wrap" *ngIf="cart.items.length != 0; else emptyCart">
+    <div class="cart-grid">
+      <div class="cart-list">
+        <div class="cart-head">
+          <span>Product</span><span>Price</span><span>Quantity</span
+          ><span>Total</span><span></span>
+        </div>
+        <div class="cart-row" *ngFor="let c of cart.items">
+          <a class="cart-product" routerLink="/product/{{ c.productId }}">
+            <span class="cart-thumb"
+              ><img src="{{ c.picture.src }}" alt="{{ c.picture.alt }}"
+            /></span>
+            <span class="cart-info">
+              <strong>{{ c.productName }}</strong>
+              <small class="text-muted">Size: {{ c.size }}</small>
+            </span>
+          </a>
+          <span class="cart-price" data-label="Price">{{
+            c.totalPrice / c.quantity | price
+          }}</span>
+          <div class="input-group quantity cart-qty" data-label="Quantity">
+            <div class="input-group-btn">
+              <button
+                class="btn btn-sm btn-primary btn-minus"
+                (click)="decreaseQuantity(c.productId, c.sizeId)"
+                aria-label="Decrease quantity"
+              >
+                <i class="fa fa-minus"></i>
+              </button>
+            </div>
+            <input
+              type="text"
+              class="form-control form-control-sm text-center"
+              [value]="c.quantity"
+              readonly
+              aria-label="Quantity"
+            />
+            <div class="input-group-btn">
+              <button
+                class="btn btn-sm btn-primary btn-plus"
+                (click)="increaseQuantity(c.productId, c.sizeId)"
+                aria-label="Increase quantity"
+              >
+                <i class="fa fa-plus"></i>
+              </button>
+            </div>
+          </div>
+          <span class="cart-total" data-label="Total">{{
+            c.totalPrice | currency: "EUR"
+          }}</span>
+          <button
+            (click)="removeCartItem(c.productId, c.sizeId)"
+            class="cart-remove"
+            aria-label="Remove item"
+          >
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <a routerLink="/shop" class="link-arrow mt-3"
+          ><i class="fas fa-arrow-left" style="transform: none"></i>Continue
+          shopping</a
+        >
+      </div>
+
+      <aside class="summary-card">
+        <h4 class="summary-title">Cart Summary</h4>
+        <div class="summary-line">
+          <span>Subtotal</span><strong>{{ cartTotal | price }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>Shipping</span><strong>{{ shippingFee | price }}</strong>
+        </div>
+        <div class="summary-line summary-total">
+          <span>Total</span
+          ><strong>{{ cartTotal + shippingFee | price }}</strong>
+        </div>
+        <a
+          *ngIf="isLoggedIn()"
+          routerLink="/checkout"
+          class="btn btn-block btn-primary btn-lg mt-3"
+          >Proceed To Checkout</a
+        >
+        <a
+          *ngIf="!isLoggedIn()"
+          routerLink="/login"
+          class="btn btn-block btn-primary btn-lg mt-3"
+          >Log In To Checkout</a
+        >
+        <p *ngIf="!isLoggedIn()" class="text-center small text-muted mt-3 mb-0">
+          Don't have an account? <a routerLink="/register">Create one</a> - your
+          cart will be waiting for you.
+        </p>
+      </aside>
+    </div>
+  </div>
+</ng-container>
+<ng-template #emptyCart>
+  <div class="wrap">
+    <div class="empty-cart">
+      <span class="empty-cart-icon"><i class="fas fa-shopping-bag"></i></span>
+      <h5 class="font-weight-semi-bold text-uppercase mb-2">Cart is empty.</h5>
+      <p class="text-muted">Looks like you haven't added anything yet.</p>
+      <a routerLink="/shop" class="btn btn-primary">Shop now</a>
+    </div>
+  </div>
+</ng-template>

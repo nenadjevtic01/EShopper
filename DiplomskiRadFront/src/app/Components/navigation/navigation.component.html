@@ -1,0 +1,213 @@
+<div class="announce">
+  <div class="announce-inner">
+    <span class="announce-msg"
+      ><i class="fas fa-shipping-fast"></i>Shipping calculated at checkout
+      &middot; 14-day returns</span
+    >
+    <span class="announce-social d-none d-md-inline-flex">
+      <a
+        href="https://www.facebook.com/"
+        target="_blank"
+        rel="noopener"
+        aria-label="Facebook"
+        ><i class="fab fa-facebook-f"></i
+      ></a>
+      <a
+        href="https://www.twitter.com/"
+        target="_blank"
+        rel="noopener"
+        aria-label="Twitter"
+        ><i class="fab fa-twitter"></i
+      ></a>
+      <a
+        href="https://www.instagram.com/"
+        target="_blank"
+        rel="noopener"
+        aria-label="Instagram"
+        ><i class="fab fa-instagram"></i
+      ></a>
+      <a
+        href="https://www.youtube.com/"
+        target="_blank"
+        rel="noopener"
+        aria-label="YouTube"
+        ><i class="fab fa-youtube"></i
+      ></a>
+    </span>
+  </div>
+</div>
+
+<header class="site-header" [class.is-scrolled]="scrolled">
+  <div class="site-header-inner">
+    <a routerLink="/home" class="brand" aria-label="E Shopper home">
+      <span class="brand-mark">E</span><span class="brand-word">Shopper</span>
+    </a>
+
+    <nav class="primary-nav" [class.open]="menuOpen" aria-label="Main">
+      <div class="nav-links">
+        <ng-container *ngFor="let nav of navigation">
+          <a
+            *ngIf="!(isAdmin() && nav.path === '/about')"
+            [routerLink]="nav.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: nav.path === '/home' }"
+            class="nav-link-item"
+            >{{ nav.name }}</a
+          >
+        </ng-container>
+
+        <div class="cat-menu">
+          <button
+            type="button"
+            class="nav-link-item cat-toggle"
+            [class.open]="catOpen"
+            (click)="toggleCategories($event)"
+            aria-haspopup="true"
+            [attr.aria-expanded]="catOpen"
+          >
+            Categories<i class="fas fa-chevron-down"></i>
+          </button>
+          <div
+            class="cat-panel"
+            [class.open]="catOpen"
+            (click)="$event.stopPropagation()"
+          >
+            <a
+              *ngFor="let c of categories"
+              routerLink="/shop"
+              [queryParams]="{ category: c.id }"
+              class="cat-panel-item"
+            >
+              <img
+                *ngIf="c.img?.src"
+                [src]="c.img.src"
+                [alt]="c.img.alt"
+                loading="lazy"
+              />
+              <span>{{ c.name }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-auth-mobile">
+        <ng-container *ngIf="!isLoggedIn()">
+          <a routerLink="/login" class="btn btn-outline-primary btn-block"
+            >Login</a
+          >
+          <a routerLink="/register" class="btn btn-primary btn-block"
+            >Register</a
+          >
+        </ng-container>
+        <ng-container *ngIf="isLoggedIn()">
+          <a routerLink="/profile" class="btn btn-outline-primary btn-block"
+            ><i
+              class="fas mr-2"
+              [ngClass]="isAdmin() ? 'fa-user-shield' : 'fa-user-circle'"
+            ></i
+            >{{ currentUserName }}</a
+          >
+          <a
+            *ngIf="isAdmin()"
+            routerLink="/admin/users"
+            class="btn btn-outline-primary btn-block"
+            >Admin Panel</a
+          >
+          <button
+            type="button"
+            class="btn btn-primary btn-block"
+            (click)="logout()"
+          >
+            Logout
+          </button>
+        </ng-container>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <a
+        *ngIf="!isAdmin()"
+        routerLink="/cart"
+        class="icon-btn cart-btn"
+        aria-label="Shopping cart"
+      >
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-count" [class.has-items]="cartCount > 0">{{
+          cartCount
+        }}</span>
+      </a>
+
+      <ng-container *ngIf="!isLoggedIn()">
+        <a routerLink="/login" class="header-login d-none d-lg-inline-block"
+          >Login</a
+        >
+        <a
+          routerLink="/register"
+          class="btn btn-primary btn-sm d-none d-lg-inline-block"
+          >Register</a
+        >
+      </ng-container>
+
+      <div
+        class="user-menu d-none d-lg-block"
+        *ngIf="isLoggedIn() && currentUserName"
+      >
+        <button
+          type="button"
+          class="user-toggle current-user-badge"
+          (click)="toggleUser($event)"
+          [attr.aria-expanded]="userOpen"
+        >
+          <span class="avatar">
+            <img
+              *ngIf="avatarSrc; else avatarFallback"
+              [src]="avatarSrc"
+              alt=""
+            />
+            <ng-template #avatarFallback>
+              <i
+                class="fas fa-user-shield"
+                *ngIf="isAdmin(); else initialsTpl"
+              ></i>
+            </ng-template>
+            <ng-template #initialsTpl>{{ initials }}</ng-template>
+          </span>
+          <span class="user-name">{{ currentUserName }}</span>
+          <i class="fas fa-chevron-down user-caret"></i>
+        </button>
+        <div
+          class="user-panel"
+          [class.open]="userOpen"
+          (click)="$event.stopPropagation()"
+        >
+          <a routerLink="/profile" class="user-panel-item"
+            ><i class="far fa-user"></i>My profile</a
+          >
+          <a *ngIf="!isAdmin()" routerLink="/orders" class="user-panel-item"
+            ><i class="fas fa-receipt"></i>My orders</a
+          >
+          <a *ngIf="isAdmin()" routerLink="/admin/users" class="user-panel-item"
+            ><i class="fas fa-sliders-h"></i>Admin Panel</a
+          >
+          <button
+            type="button"
+            class="user-panel-item user-panel-logout"
+            (click)="logout()"
+          >
+            <i class="fas fa-sign-out-alt"></i>Logout
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="navbar-toggler menu-toggle"
+        (click)="toggleMenu()"
+        [class.open]="menuOpen"
+        aria-label="Toggle menu"
+      >
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>

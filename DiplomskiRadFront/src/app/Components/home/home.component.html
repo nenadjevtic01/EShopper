@@ -1,0 +1,151 @@
+<app-hero></app-hero>
+
+<section class="wrap perks-wrap">
+  <div class="perks">
+    <div class="perk" *ngFor="let perk of perks">
+      <span class="perk-icon"><i class="fas" [ngClass]="perk.icon"></i></span>
+      <div>
+        <h3>{{ perk.title }}</h3>
+        <p>{{ perk.text }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap page-section" *ngIf="categories.length > 0">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Browse</span>
+      <h2>Shop by category</h2>
+    </div>
+    <a routerLink="/shop" class="link-arrow"
+      >All products<i class="fas fa-arrow-right"></i
+    ></a>
+  </div>
+  <div class="category-grid">
+    <a
+      *ngFor="let c of categories"
+      routerLink="/shop"
+      [queryParams]="{ category: c.id }"
+      class="category-tile"
+    >
+      <span class="category-img"
+        ><img [src]="c.img.src" [alt]="c.img.alt" loading="lazy"
+      /></span>
+      <span class="category-name"
+        >{{ c.name }}<i class="fas fa-arrow-right"></i
+      ></span>
+    </a>
+  </div>
+</section>
+
+<section
+  class="wrap page-section promo-section"
+  *ngFor="let promo of activePromotions"
+>
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Limited offer</span>
+      <h2>{{ promo.name }}</h2>
+      <p class="lead-note">
+        Special prices on selected pieces - while the offer lasts.
+      </p>
+    </div>
+    <a routerLink="/shop" class="link-arrow"
+      >Shop all<i class="fas fa-arrow-right"></i
+    ></a>
+  </div>
+  <app-carousel
+    [items]="promo.products"
+    [perView]="4"
+    [gap]="22"
+    [autoplayMs]="5500"
+    [ariaLabel]="promo.name"
+  >
+    <ng-template let-p>
+      <app-product-card
+        [product]="p"
+        [discount]="p.discountPercentage"
+      ></app-product-card>
+    </ng-template>
+  </app-carousel>
+</section>
+
+<section class="page-section brands-band" *ngIf="brands && brands.length > 0">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Labels we love</span>
+        <h2>Our brands</h2>
+      </div>
+    </div>
+    <app-carousel
+      [items]="brands"
+      [perView]="4"
+      [gap]="24"
+      [autoplayMs]="3800"
+      ariaLabel="Brands"
+    >
+      <ng-template let-b>
+        <a
+          [routerLink]="['/shop']"
+          [queryParams]="{ brand: b.id }"
+          class="brand-tile"
+        >
+          <span class="brand-tile-img"
+            ><img [src]="b.img.src" [alt]="b.img.alt" loading="lazy"
+          /></span>
+          <span class="brand-tile-name">{{ b.name }}</span>
+        </a>
+      </ng-template>
+    </app-carousel>
+  </div>
+</section>
+
+<section class="wrap page-section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">New in</span>
+      <h2>Just arrived</h2>
+    </div>
+    <a routerLink="/shop" class="link-arrow"
+      >View all<i class="fas fa-arrow-right"></i
+    ></a>
+  </div>
+  <div class="product-grid">
+    <app-product-card
+      *ngFor="let p of recentProducts"
+      [product]="p"
+    ></app-product-card>
+  </div>
+</section>
+
+<section class="wrap page-section">
+  <div class="newsletter">
+    <div class="newsletter-copy">
+      <span class="eyebrow">Newsletter</span>
+      <h2>Stay updated</h2>
+      <p>
+        Stay up to date with the latest trends. New arrivals and offers straight
+        to your inbox.
+      </p>
+    </div>
+    <form class="newsletter-form" (ngSubmit)="subscribe()">
+      <input
+        type="email"
+        class="form-control"
+        placeholder="Email Goes Here"
+        maxlength="100"
+        [(ngModel)]="newsletterEmail"
+        name="newsletterEmail"
+      />
+      <button type="submit" class="btn btn-primary" [disabled]="subscribing">
+        <span
+          class="spinner-border spinner-border-sm mr-1"
+          *ngIf="subscribing"
+        ></span
+        >Subscribe
+      </button>
+    </form>
+  </div>
+</section>

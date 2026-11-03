@@ -1,0 +1,292 @@
+<div class="wrap detail-wrap" *ngIf="dataLoaded">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a routerLink="/home">Home</a><i class="fas fa-chevron-right"></i>
+    <a routerLink="/shop">Shop</a><i class="fas fa-chevron-right"></i>
+    <a routerLink="/shop" [queryParams]="{ category: productCategory[0].id }">{{
+      productCategory[0].name
+    }}</a
+    ><i class="fas fa-chevron-right"></i>
+    <span>{{ product.productName }}</span>
+  </nav>
+
+  <div class="detail-grid">
+    <div class="gallery">
+      <div class="gallery-stage">
+        <button
+          type="button"
+          class="gallery-arrow gallery-arrow-left"
+          *ngIf="product.pictures?.length > 1"
+          (click)="previousImage()"
+          aria-label="Previous image"
+        >
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <img
+          [src]="product.pictures[currentImageIndex]?.src || ''"
+          [alt]="product.pictures[currentImageIndex]?.alt || ''"
+        />
+        <button
+          type="button"
+          class="gallery-arrow gallery-arrow-right"
+          *ngIf="product.pictures?.length > 1"
+          (click)="nextImage()"
+          aria-label="Next image"
+        >
+          <i class="fa fa-chevron-right"></i>
+        </button>
+        <span class="gallery-badge" *ngIf="discountPercent > 0"
+          >-{{ discountPercent }}%</span
+        >
+      </div>
+      <div class="gallery-thumbs" *ngIf="product.pictures?.length > 1">
+        <button
+          type="button"
+          *ngFor="let pic of product.pictures; let i = index"
+          class="gallery-thumb"
+          [class.active]="i === currentImageIndex"
+          (click)="goToImage(i)"
+        >
+          <img [src]="pic.src" [alt]="pic.alt" />
+        </button>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="info-tags">
+        <a
+          class="chip"
+          routerLink="/shop"
+          [queryParams]="{ brand: productBrand[0].id }"
+          >{{ productBrand[0].name }}</a
+        >
+        <a
+          class="chip"
+          routerLink="/shop"
+          [queryParams]="{ gender: productGender[0].id }"
+          >{{ productGender[0].name }}</a
+        >
+        <a
+          class="chip"
+          routerLink="/shop"
+          [queryParams]="{ category: productCategory[0].id }"
+          >{{ productCategory[0].name }}</a
+        >
+      </div>
+
+      <h1 class="info-title">{{ product.productName }}</h1>
+
+      <div class="info-rating" *ngIf="product.ratingsCount > 0">
+        <span class="stars text-primary">
+          <small
+            *ngFor="let star of [1, 2, 3, 4, 5]"
+            [ngClass]="starClass(star, product.averageRating)"
+          ></small>
+        </span>
+        <span class="rating-text"
+          >{{ product.averageRating | number: "1.1-1" }} ({{
+            product.ratingsCount
+          }}
+          {{ product.ratingsCount === 1 ? "Review" : "Reviews" }})</span
+        >
+      </div>
+      <div class="info-rating" *ngIf="product.ratingsCount === 0">
+        <span class="rating-text">No reviews yet.</span>
+      </div>
+
+      <div class="info-price">
+        <span class="price-now" [class.is-sale]="discountPercent > 0">{{
+          product.newPrice | price
+        }}</span>
+        <span class="price-old" *ngIf="product.oldPrice != null"
+          ><del>{{ product.oldPrice | price }}</del></span
+        >
+        <span class="badge badge-danger" *ngIf="discountPercent > 0"
+          >-{{ discountPercent }}%</span
+        >
+        <span class="badge badge-danger" *ngIf="!product.inStock">{{
+          discountPercent > 0 ? "Sold Out" : "Not In Stock"
+        }}</span>
+      </div>
+
+      <div class="info-block" *ngIf="product.sizes.length != 0">
+        <div class="info-label">Size</div>
+        <div class="size-picker">
+          <label
+            class="size-pill"
+            *ngFor="let size of product.sizes"
+            [class.is-disabled]="size.quantity === 0"
+            [class.is-selected]="selectedSize === size.id"
+            for="size{{ size.id }}"
+          >
+            <input
+              type="radio"
+              name="size"
+              id="size{{ size.id }}"
+              [value]="size.id"
+              [disabled]="size.quantity === 0"
+              [(ngModel)]="selectedSize"
+              (change)="onSizeChange()"
+              (ngModelChange)="checkDisabled()"
+            />
+            <span>{{ size.name }}</span>
+            <small *ngIf="size.quantity === 0">Sold out</small>
+          </label>
+        </div>
+      </div>
+
+      <div class="info-block buy-row">
+        <div class="info-label">Quantity</div>
+        <div class="buy-controls">
+          <div class="input-group quantity">
+            <div class="input-group-btn">
+              <button
+                class="btn btn-primary btn-minus"
+                (click)="decreaseQuantity()"
+                aria-label="Decrease quantity"
+              >
+                <i class="fa fa-minus"></i>
+              </button>
+            </div>
+            <input
+              type="text"
+              class="form-control text-center"
+              min="1"
+              [ngModel]="quantity"
+              (ngModelChange)="checkDisabled()"
+            />
+            <div class="input-group-btn">
+              <button
+                class="btn btn-primary btn-plus"
+                (click)="increaseQuantity()"
+                aria-label="Increase quantity"
+              >
+                <i class="fa fa-plus"></i>
+              </button>
+            </div>
+          </div>
+          <button
+            *ngIf="!isAdmin()"
+            [disabled]="addToCartDisabled"
+            (click)="this.addToCart(product.id, selectedSize, quantity)"
+            class="btn btn-primary btn-lg add-btn"
+          >
+            <i class="fa fa-shopping-bag mr-2"></i>Add To Cart
+          </button>
+          <span *ngIf="isAdmin()" class="admin-note"
+            ><i class="fas fa-info-circle mr-1"></i>Admins can't add items to a
+            cart.</span
+          >
+        </div>
+      </div>
+
+      <ul class="info-facts">
+        <li>
+          <i class="fas fa-shipping-fast"></i>Shipping calculated at checkout
+        </li>
+        <li><i class="fas fa-undo-alt"></i>14-day returns</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="detail-tabs">
+    <div class="nav nav-tabs">
+      <p
+        class="nav-item nav-link"
+        [class.active]="activeTab === 'info'"
+        (click)="activeTab = 'info'"
+      >
+        Information
+      </p>
+      <p
+        class="nav-item nav-link"
+        [class.active]="activeTab === 'reviews'"
+        (click)="activeTab = 'reviews'"
+      >
+        Reviews ({{ product.ratingsCount }})
+      </p>
+    </div>
+    <div class="tab-content">
+      <div
+        class="tab-pane"
+        [class.show]="activeTab === 'info'"
+        [class.active]="activeTab === 'info'"
+      >
+        <h4 class="tab-heading">Additional Information</h4>
+        <ul class="list-group list-group-flush spec-list">
+          <li class="list-group-item px-0">
+            <span>Material</span> <b>{{ product.material }}</b>
+          </li>
+          <li class="list-group-item px-0">
+            <span>Country of origin</span> <b>{{ product.countryOfOrigin }}</b>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="tab-pane"
+        [class.show]="activeTab === 'reviews'"
+        [class.active]="activeTab === 'reviews'"
+      >
+        <div class="reviews">
+          <p class="text-center text-muted" *ngIf="product.ratingsCount === 0">
+            No reviews yet - be the first to review this product after
+            purchasing it.
+          </p>
+          <div class="review" *ngFor="let r of visibleReviews">
+            <div class="text-primary">
+              <small
+                *ngFor="let star of [1, 2, 3, 4, 5]"
+                [ngClass]="starClass(star, r.rating)"
+              ></small>
+              <small class="text-muted ml-1">{{
+                r.rating | number: "1.1-1"
+              }}</small>
+            </div>
+            <h6 class="mb-1 mt-1">
+              {{ r.userName }}
+              <small class="text-muted font-weight-normal">{{
+                r.createdAt | date: "mediumDate"
+              }}</small>
+            </h6>
+            <p class="mb-0" *ngIf="r.comment">{{ r.comment }}</p>
+          </div>
+          <div
+            class="text-center"
+            *ngIf="
+              product.ratings && reviewsVisibleCount < product.ratings.length
+            "
+          >
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="showMoreReviews()"
+            >
+              Show more reviews
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="wrap page-section" *ngIf="randomProducts?.length > 0">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Keep browsing</span>
+      <h2>You May Also Like</h2>
+    </div>
+    <a routerLink="/shop" class="link-arrow"
+      >View all<i class="fas fa-arrow-right"></i
+    ></a>
+  </div>
+  <app-carousel
+    [items]="randomProducts"
+    [perView]="4"
+    [gap]="22"
+    [autoplayMs]="0"
+    ariaLabel="Related products"
+  >
+    <ng-template let-r>
+      <app-product-card [product]="r"></app-product-card>
+    </ng-template>
+  </app-carousel>
+</section>

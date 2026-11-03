@@ -1,0 +1,29 @@
+<div class="admin-head">
+  <div class="admin-head-inner">
+    <div>
+      <span class="admin-eyebrow">Control center</span>
+      <h1 class="admin-title">Admin Panel</h1>
+    </div>
+    <ul class="nav nav-pills admin-group-tabs">
+      <li class="nav-item" *ngFor="let g of groups; let i = index">
+        <a
+          class="nav-link"
+          [class.active]="activeGroupIndex === i"
+          (click)="selectGroup(i)"
+        >
+          <i class="fas mr-1" [ngClass]="g.icon"></i>{{ g.label }}
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="container-fluid px-xl-5 mb-4">
+  <ul class="nav nav-tabs admin-tabs">
+    <li class="nav-item" *ngFor="let link of groups[activeGroupIndex].links">
+      <a class="nav-link" [routerLink]="link.route" routerLinkActive="active">
+        <i class="fas mr-1" [ngClass]="link.icon"></i>{{ link.label }}
+      </a>
+    </li>
+  </ul>
+</div>

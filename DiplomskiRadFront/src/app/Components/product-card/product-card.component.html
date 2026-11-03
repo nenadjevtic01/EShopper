@@ -1,0 +1,46 @@
+<a
+  class="pcard"
+  [routerLink]="['/product', product.id]"
+  [class.pcard-out]="!product.inStock"
+>
+  <div class="pcard-media">
+    <img
+      class="pcard-img"
+      *ngIf="picture"
+      [src]="picture.src"
+      [alt]="picture.alt || product.productName"
+      loading="lazy"
+    />
+    <img
+      class="pcard-img pcard-img-alt"
+      *ngIf="secondPicture"
+      [src]="secondPicture.src"
+      [alt]="secondPicture.alt || product.productName"
+      loading="lazy"
+    />
+    <div class="pcard-badges">
+      <span class="pcard-badge pcard-badge-sale" *ngIf="discountValue > 0"
+        >-{{ discountValue }}%</span
+      >
+      <span class="pcard-badge pcard-badge-out" *ngIf="!product.inStock">{{
+        stockLabel
+      }}</span>
+    </div>
+    <span class="pcard-cta"
+      >View details<i class="fas fa-arrow-right"></i
+    ></span>
+  </div>
+  <div class="pcard-body">
+    <h3 class="pcard-name">{{ product.productName }}</h3>
+    <div class="pcard-price">
+      <span class="pcard-now" [class.is-sale]="discountValue > 0">{{
+        product.newPrice | price
+      }}</span>
+      <span
+        class="pcard-old"
+        *ngIf="product.oldPrice != null && product.oldPrice > product.newPrice"
+        >{{ product.oldPrice | price }}</span
+      >
+    </div>
+  </div>
+</a>

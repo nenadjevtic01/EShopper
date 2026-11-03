@@ -1,0 +1,479 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-percentage text-primary mr-2"></i>Promotions
+          </h5>
+          <button class="btn btn-primary btn-sm" (click)="toggleCreateForm()">
+            <i
+              class="fas"
+              [ngClass]="showCreateForm ? 'fa-times' : 'fa-plus'"
+            ></i>
+            {{ showCreateForm ? " Cancel" : " Add promotion" }}
+          </button>
+        </div>
+
+        <div class="card-body border-bottom" *ngIf="showCreateForm">
+          <div class="form-group">
+            <label class="small text-muted mb-1">Promotion name</label>
+            <input
+              class="form-control"
+              placeholder="e.g. Fall Sale"
+              [(ngModel)]="createName"
+            />
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label class="small text-muted mb-1">Valid from</label>
+              <input
+                class="form-control"
+                type="date"
+                [(ngModel)]="createValidFrom"
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label class="small text-muted mb-1">Valid until</label>
+              <input
+                class="form-control"
+                type="date"
+                [(ngModel)]="createValidUntil"
+              />
+            </div>
+          </div>
+          <p class="text-muted small">
+            You can create several promotions, as long as their dates don't
+            overlap (both the first and the last day count). The promotion whose
+            dates include today is the one that is applied and shown on the
+            site, a future one waits for its first day, and one that has ended
+            is marked as expired. Only active products that are in stock can be
+            added.
+          </p>
+
+          <div
+            class="promo-group-box mb-3"
+            *ngFor="let group of createGroups; let gi = index"
+          >
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h6 class="mb-0">Discount group {{ gi + 1 }}</h6>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                *ngIf="createGroups.length > 1"
+                (click)="removeGroup(createGroups, gi)"
+              >
+                <i class="fas fa-times"></i> Remove group
+              </button>
+            </div>
+            <div class="form-group" style="max-width: 200px">
+              <label class="small text-muted mb-1">Discount (%)</label>
+              <input
+                class="form-control"
+                type="number"
+                min="1"
+                max="100"
+                [(ngModel)]="group.discountPercentage"
+              />
+            </div>
+            <div class="form-group">
+              <label class="small text-muted mb-1"
+                >Products ({{
+                  group.selectedProductIds.length
+                }}
+                selected)</label
+              >
+              <input
+                class="form-control mb-2"
+                placeholder="Search products..."
+                [(ngModel)]="group.search"
+              />
+              <div class="product-picker">
+                <label
+                  class="product-pick-row"
+                  *ngFor="let p of filteredProducts(group)"
+                  for="createGroup{{ gi }}Product{{ p.id }}"
+                >
+                  <input
+                    type="checkbox"
+                    id="createGroup{{ gi }}Product{{ p.id }}"
+                    [checked]="group.selectedProductIds.includes(p.id)"
+                    (change)="toggleGroupProduct(group, p.id)"
+                  />
+                  <img
+                    *ngIf="p.picture && p.picture[0]"
+                    class="product-pick-thumb"
+                    [src]="p.picture[0].src"
+                    [alt]="p.picture[0].alt"
+                  />
+                  <span class="product-pick-name"
+                    ><span class="text-muted small mr-1">#{{ p.id }}</span
+                    >{{ p.productName }}</span
+                  >
+                  <span class="badge badge-secondary mr-1" *ngIf="!p.inStock"
+                    >Not in stock</span
+                  >
+                  <span class="product-pick-price">{{
+                    p.newPrice | price
+                  }}</span>
+                </label>
+                <p
+                  class="text-muted small mb-0"
+                  *ngIf="filteredProducts(group).length === 0"
+                >
+                  No products match.
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            class="btn btn-outline-secondary btn-sm mb-3"
+            (click)="addGroup(createGroups)"
+          >
+            <i class="fas fa-plus"></i> Add another discount group
+          </button>
+          <div>
+            <button
+              class="btn btn-success"
+              [disabled]="creating"
+              (click)="createPromotion()"
+            >
+              <span
+                *ngIf="creating"
+                class="spinner-border spinner-border-sm mr-1"
+              ></span
+              >Create promotion
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="card-body border-bottom d-flex flex-wrap align-items-center justify-content-between"
+        >
+          <div class="input-group" style="max-width: 320px">
+            <input
+              class="form-control"
+              placeholder="Search by name"
+              [(ngModel)]="keyword"
+              (keyup.enter)="search()"
+            />
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" (click)="search()">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="custom-control custom-checkbox mt-2 mt-md-0">
+            <input
+              type="checkbox"
+              class="custom-control-input"
+              id="includeInactivePromotions"
+              [(ngModel)]="includeInactive"
+              (change)="loadPromotions()"
+            />
+            <label class="custom-control-label" for="includeInactivePromotions"
+              >Show deactivated and expired promotions</label
+            >
+          </div>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div
+          class="card-body"
+          *ngIf="dataLoaded && !loading && promotions.length === 0"
+        >
+          <p class="text-muted mb-0">No promotions yet.</p>
+        </div>
+
+        <div
+          class="table-responsive position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded && promotions.length > 0"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="thead-light">
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Products</th>
+                <th>Valid</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let promo of promotions">
+                <tr
+                  *ngIf="editingPromotionId !== promo.id"
+                  [class.bg-light]="
+                    status(promo) === 'inactive' || status(promo) === 'expired'
+                  "
+                  class="promo-row"
+                  (click)="toggleExpand(promo.id)"
+                >
+                  <td style="width: 24px">
+                    <i
+                      class="fas"
+                      [ngClass]="
+                        expandedPromotionIds.has(promo.id)
+                          ? 'fa-chevron-down'
+                          : 'fa-chevron-right'
+                      "
+                    ></i>
+                  </td>
+                  <td>{{ promo.name }}</td>
+                  <td>{{ promo.productCount }}</td>
+                  <td class="text-nowrap">
+                    {{ promo.validFrom | date: "mediumDate" : "UTC" }} -
+                    {{ promo.validUntil | date: "mediumDate" : "UTC" }}
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="statusClass(promo)">{{
+                      statusLabel(promo)
+                    }}</span>
+                  </td>
+                  <td class="text-right text-nowrap">
+                    <button
+                      class="btn btn-sm btn-outline-primary mr-1"
+                      [disabled]="status(promo) === 'expired'"
+                      [attr.title]="
+                        status(promo) === 'expired'
+                          ? 'Expired promotions can not be edited'
+                          : null
+                      "
+                      (click)="$event.stopPropagation(); startEdit(promo)"
+                    >
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm"
+                      [ngClass]="
+                        promo.isActive
+                          ? 'btn-outline-danger'
+                          : 'btn-outline-success'
+                      "
+                      [disabled]="status(promo) === 'expired'"
+                      (click)="
+                        $event.stopPropagation();
+                        togglePromotion(promo.id, promo.name, promo.isActive)
+                      "
+                    >
+                      <i
+                        class="fas"
+                        [ngClass]="promo.isActive ? 'fa-ban' : 'fa-undo'"
+                      ></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-danger ml-1"
+                      title="Delete promotion"
+                      (click)="
+                        $event.stopPropagation();
+                        removePromotion(promo.id, promo.name)
+                      "
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr
+                  *ngIf="
+                    editingPromotionId !== promo.id &&
+                    expandedPromotionIds.has(promo.id)
+                  "
+                >
+                  <td colspan="6" class="bg-light">
+                    <div class="mb-3" *ngFor="let g of promo.groups">
+                      <strong class="text-primary"
+                        >{{ g.discountPercentage }}% off:</strong
+                      >
+                      <p
+                        class="text-muted mb-1"
+                        *ngIf="g.products.length === 0"
+                      >
+                        no products
+                      </p>
+                      <div
+                        class="promo-product-list"
+                        *ngIf="g.products.length > 0"
+                      >
+                        <a
+                          class="promo-product-chip"
+                          *ngFor="let p of g.products"
+                          routerLink="/product/{{ p.productId }}"
+                          target="_blank"
+                        >
+                          <img
+                            *ngIf="p.picture"
+                            [src]="p.picture.src"
+                            [alt]="p.picture.alt"
+                            class="promo-product-thumb"
+                          />
+                          <span class="text-muted small mr-1"
+                            >#{{ p.productId }}</span
+                          >
+                          <span>{{ p.productName }}</span>
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="editingPromotionId === promo.id" class="table-light">
+                  <td colspan="6">
+                    <div class="py-2">
+                      <div class="form-group">
+                        <label class="small text-muted mb-1"
+                          >Promotion name</label
+                        >
+                        <input class="form-control" [(ngModel)]="editName" />
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-6">
+                          <label class="small text-muted mb-1"
+                            >Valid from</label
+                          >
+                          <input
+                            class="form-control"
+                            type="date"
+                            [(ngModel)]="editValidFrom"
+                          />
+                        </div>
+                        <div class="form-group col-md-6">
+                          <label class="small text-muted mb-1"
+                            >Valid until</label
+                          >
+                          <input
+                            class="form-control"
+                            type="date"
+                            [(ngModel)]="editValidUntil"
+                          />
+                        </div>
+                      </div>
+
+                      <div
+                        class="promo-group-box mb-3"
+                        *ngFor="let group of editGroups; let gi = index"
+                      >
+                        <div
+                          class="d-flex align-items-center justify-content-between mb-2"
+                        >
+                          <h6 class="mb-0">Discount group {{ gi + 1 }}</h6>
+                          <button
+                            class="btn btn-sm btn-outline-danger"
+                            *ngIf="editGroups.length > 1"
+                            (click)="removeGroup(editGroups, gi)"
+                          >
+                            <i class="fas fa-times"></i> Remove group
+                          </button>
+                        </div>
+                        <div class="form-group" style="max-width: 200px">
+                          <label class="small text-muted mb-1"
+                            >Discount (%)</label
+                          >
+                          <input
+                            class="form-control"
+                            type="number"
+                            min="1"
+                            max="100"
+                            [(ngModel)]="group.discountPercentage"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label class="small text-muted mb-1"
+                            >Products ({{
+                              group.selectedProductIds.length
+                            }}
+                            selected)</label
+                          >
+                          <input
+                            class="form-control mb-2"
+                            placeholder="Search products..."
+                            [(ngModel)]="group.search"
+                          />
+                          <div class="product-picker">
+                            <label
+                              class="product-pick-row"
+                              *ngFor="let p of filteredProducts(group)"
+                              for="editGroup{{ gi }}Product{{ p.id }}"
+                            >
+                              <input
+                                type="checkbox"
+                                id="editGroup{{ gi }}Product{{ p.id }}"
+                                [checked]="
+                                  group.selectedProductIds.includes(p.id)
+                                "
+                                (change)="toggleGroupProduct(group, p.id)"
+                              />
+                              <img
+                                *ngIf="p.picture && p.picture[0]"
+                                class="product-pick-thumb"
+                                [src]="p.picture[0].src"
+                                [alt]="p.picture[0].alt"
+                              />
+                              <span class="product-pick-name"
+                                ><span class="text-muted small mr-1"
+                                  >#{{ p.id }}</span
+                                >{{ p.productName }}</span
+                              >
+                              <span
+                                class="badge badge-secondary mr-1"
+                                *ngIf="!p.inStock"
+                                >Not in stock</span
+                              >
+                              <span class="product-pick-price">{{
+                                p.newPrice | price
+                              }}</span>
+                            </label>
+                            <p
+                              class="text-muted small mb-0"
+                              *ngIf="filteredProducts(group).length === 0"
+                            >
+                              No products match.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        class="btn btn-outline-secondary btn-sm mb-3"
+                        (click)="addGroup(editGroups)"
+                      >
+                        <i class="fas fa-plus"></i> Add another discount group
+                      </button>
+                      <div>
+                        <button
+                          class="btn btn-sm btn-success mr-1"
+                          [disabled]="saving"
+                          (click)="saveEdit()"
+                        >
+                          <span
+                            *ngIf="saving"
+                            class="spinner-border spinner-border-sm mr-1"
+                          ></span
+                          >Save
+                        </button>
+                        <button
+                          class="btn btn-sm btn-secondary"
+                          (click)="cancelEdit()"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,198 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-clipboard-list text-primary mr-2"></i>Audit Log
+          </h5>
+          <span class="text-muted small" *ngIf="dataLoaded"
+            >{{ totalCount }} {{ totalCount === 1 ? "entry" : "entries" }}</span
+          >
+        </div>
+
+        <div class="card-body border-top d-flex flex-wrap align-items-center">
+          <div class="input-group mr-3 mb-2 mb-md-0" style="max-width: 320px">
+            <input
+              class="form-control"
+              placeholder="Search by action"
+              [(ngModel)]="keyword"
+              (keyup.enter)="search()"
+            />
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" (click)="search()">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </div>
+          <select
+            class="form-control form-control-sm user-filter mr-2"
+            [(ngModel)]="userFilter"
+            (ngModelChange)="search()"
+          >
+            <option value="">All users</option>
+            <option *ngFor="let u of knownUsers" [value]="u">{{ u }}</option>
+          </select>
+          <select
+            class="form-control form-control-sm result-filter"
+            [(ngModel)]="resultFilter"
+            (ngModelChange)="search()"
+          >
+            <option value="all">All results</option>
+            <option value="allowed">Allowed</option>
+            <option value="denied">Denied</option>
+          </select>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div
+          class="card-body"
+          *ngIf="dataLoaded && !loading && logs.length === 0"
+        >
+          <p class="text-muted mb-0">No entries found.</p>
+        </div>
+
+        <div
+          class="table-responsive position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded && logs.length > 0"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="thead-light">
+              <tr>
+                <th class="sortable-th" (click)="sortBy('id')">
+                  #
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'id'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th class="sortable-th" (click)="sortBy('date')">
+                  When
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'date'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th class="sortable-th" (click)="sortBy('user')">
+                  User
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'user'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th class="sortable-th" (click)="sortBy('action')">
+                  Action
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'action'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th class="sortable-th" (click)="sortBy('result')">
+                  Result
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'result'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let l of logs">
+                <td>{{ l.id }}</td>
+                <td class="text-nowrap">
+                  {{ l.executionDate | date: "MMM d, y, HH:mm:ss" }}
+                </td>
+                <td>
+                  {{ l.user
+                  }}<small class="text-muted d-block" *ngIf="l.userId"
+                    >ID {{ l.userId }}</small
+                  >
+                </td>
+                <td>{{ l.useCaseName }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="
+                      l.isAuthorized ? 'badge-success' : 'badge-danger'
+                    "
+                    >{{ l.isAuthorized ? "Allowed" : "Denied" }}</span
+                  >
+                </td>
+                <td class="data-cell" (click)="toggleExpand(l.id)">
+                  <code *ngIf="!expandedLogIds.has(l.id)">{{
+                    shortData(l.data)
+                  }}</code>
+                  <pre class="data-full" *ngIf="expandedLogIds.has(l.id)">{{
+                    l.data
+                  }}</pre>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-footer" *ngIf="dataLoaded && logs.length > 0">
+          <div class="pagination d-flex align-items-center">
+            <button
+              class="btn"
+              (click)="previousPage()"
+              [disabled]="currentPage === 1"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>Previous
+            </button>
+            <span>Page {{ currentPage }} of {{ pagesCount }}</span>
+            <button
+              class="btn"
+              (click)="nextPage()"
+              [disabled]="currentPage === pagesCount"
+            >
+              Next<i class="fas fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

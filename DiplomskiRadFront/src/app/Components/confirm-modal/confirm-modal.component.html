@@ -1,0 +1,16 @@
+<div class="confirm-backdrop" *ngIf="request" (click)="cancel()">
+  <div class="confirm-box" (click)="$event.stopPropagation()">
+    <h5 class="mb-3">{{ request.title }}</h5>
+    <p class="mb-4">{{ request.message }}</p>
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-secondary mr-2" (click)="cancel()">Cancel</button>
+      <button
+        class="btn"
+        [ngClass]="request.danger ? 'btn-danger' : 'btn-primary'"
+        (click)="confirm()"
+      >
+        {{ request.confirmLabel }}
+      </button>
+    </div>
+  </div>
+</div>

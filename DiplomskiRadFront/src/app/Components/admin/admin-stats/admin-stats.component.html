@@ -1,0 +1,226 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5 viz-root">
+  <div class="text-center py-5" *ngIf="loading">
+    <span class="spinner-border text-primary"></span>
+  </div>
+
+  <div class="row px-xl-5" *ngIf="errored && !loading">
+    <div class="col-12 text-center text-muted py-5">Could not load stats.</div>
+  </div>
+
+  <ng-container *ngIf="!loading && !errored">
+    <div class="row px-xl-5 mb-2">
+      <div class="col-6 col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-figure">{{ totalOrders }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-figure">{{ totalRevenue | price }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="stat-label">Average Order Value</div>
+            <div class="stat-figure">{{ averageOrderValue | price }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row px-xl-5">
+      <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">
+              <i class="fas fa-receipt text-primary mr-2"></i>Orders per month
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="bar-chart" *ngIf="orderBars.length > 0">
+              <div class="bar-col" *ngFor="let b of orderBars">
+                <div class="bar-track">
+                  <div class="bar bar-blue" [style.height.%]="b.heightPct">
+                    <span class="bar-tooltip"
+                      >{{ b.month }}: {{ b.value }}</span
+                    >
+                  </div>
+                </div>
+                <div class="bar-label">{{ b.month }}</div>
+              </div>
+            </div>
+            <p
+              class="text-muted text-center mb-0"
+              *ngIf="orderBars.length === 0"
+            >
+              No orders yet.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">
+              <i class="fas fa-euro-sign text-primary mr-2"></i>Revenue per
+              month
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="bar-chart" *ngIf="revenueBars.length > 0">
+              <div class="bar-col" *ngFor="let b of revenueBars">
+                <div class="bar-track">
+                  <div class="bar bar-blue" [style.height.%]="b.heightPct">
+                    <span class="bar-tooltip"
+                      >{{ b.month }}: {{ b.value | price }}</span
+                    >
+                  </div>
+                </div>
+                <div class="bar-label">{{ b.month }}</div>
+              </div>
+            </div>
+            <p
+              class="text-muted text-center mb-0"
+              *ngIf="revenueBars.length === 0"
+            >
+              No revenue yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row px-xl-5">
+      <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">
+              <i class="fas fa-list text-primary mr-2"></i>Sales by category
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="share-bar" *ngIf="categoryShares.length > 0">
+              <div
+                class="share-segment"
+                *ngFor="let s of categoryShares"
+                [style.width.%]="s.percentage"
+                [style.background]="s.color"
+              >
+                <span class="bar-tooltip"
+                  >{{ s.name }}: {{ s.percentage }}% ({{
+                    s.quantitySold
+                  }}
+                  sold)</span
+                >
+              </div>
+            </div>
+            <ul class="share-legend" *ngIf="categoryShares.length > 0">
+              <li *ngFor="let s of categoryShares">
+                <span class="swatch" [style.background]="s.color"></span>
+                <span class="legend-name">{{ s.name }}</span>
+                <span class="legend-value">{{ s.percentage }}%</span>
+              </li>
+            </ul>
+            <p
+              class="text-muted text-center mb-0"
+              *ngIf="categoryShares.length === 0"
+            >
+              No sales yet.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">
+              <i class="fas fa-tags text-primary mr-2"></i>Sales by brand
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="share-bar" *ngIf="brandShares.length > 0">
+              <div
+                class="share-segment"
+                *ngFor="let s of brandShares"
+                [style.width.%]="s.percentage"
+                [style.background]="s.color"
+              >
+                <span class="bar-tooltip"
+                  >{{ s.name }}: {{ s.percentage }}% ({{
+                    s.quantitySold
+                  }}
+                  sold)</span
+                >
+              </div>
+            </div>
+            <ul class="share-legend" *ngIf="brandShares.length > 0">
+              <li *ngFor="let s of brandShares">
+                <span class="swatch" [style.background]="s.color"></span>
+                <span class="legend-name">{{ s.name }}</span>
+                <span class="legend-value">{{ s.percentage }}%</span>
+              </li>
+            </ul>
+            <p
+              class="text-muted text-center mb-0"
+              *ngIf="brandShares.length === 0"
+            >
+              No sales yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row px-xl-5">
+      <div class="col-12 col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-white">
+            <h6 class="mb-0">
+              <i class="fas fa-credit-card text-primary mr-2"></i>Orders by
+              payment method
+            </h6>
+          </div>
+          <div
+            class="card-body d-flex flex-column flex-sm-row align-items-center"
+          >
+            <div class="donut-wrap" *ngIf="paymentMethodShares.length > 0">
+              <div class="donut" [style.background]="paymentMethodGradient">
+                <div class="donut-hole">
+                  <span class="donut-hole-figure">{{ totalOrders }}</span>
+                  <span class="donut-hole-label">orders</span>
+                </div>
+              </div>
+            </div>
+            <ul
+              class="share-legend flex-grow-1"
+              *ngIf="paymentMethodShares.length > 0"
+            >
+              <li *ngFor="let s of paymentMethodShares">
+                <span class="swatch" [style.background]="s.color"></span>
+                <span class="legend-name">{{ s.name }}</span>
+                <span class="legend-value"
+                  >{{ s.percentage }}% ({{ s.orderCount }})</span
+                >
+              </li>
+            </ul>
+            <p
+              class="text-muted text-center mb-0"
+              *ngIf="paymentMethodShares.length === 0"
+            >
+              No orders yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

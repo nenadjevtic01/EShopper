@@ -1,0 +1,488 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12 mb-3">
+      <div class="custom-control custom-checkbox">
+        <input
+          type="checkbox"
+          class="custom-control-input"
+          id="includeInactiveCatalog"
+          [(ngModel)]="includeInactive"
+          (change)="loadAll()"
+        />
+        <label class="custom-control-label" for="includeInactiveCatalog"
+          >Show deleted categories/brands</label
+        >
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-list text-primary mr-2"></i>Categories
+          </h5>
+          <button
+            class="btn btn-primary btn-sm"
+            (click)="toggleCreateCategoryForm()"
+          >
+            <i
+              class="fas"
+              [ngClass]="showCreateCategoryForm ? 'fa-times' : 'fa-plus'"
+            ></i>
+            {{ showCreateCategoryForm ? " Cancel" : " Add category" }}
+          </button>
+        </div>
+
+        <div class="card-body border-bottom" *ngIf="showCreateCategoryForm">
+          <form
+            [formGroup]="createCategoryForm"
+            (ngSubmit)="createCategory()"
+            novalidate
+          >
+            <div class="form-group">
+              <label class="small text-muted mb-1">Name</label>
+              <input
+                class="form-control"
+                placeholder="Name"
+                formControlName="name"
+                [class.is-invalid]="
+                  createCategoryForm.get('name')?.invalid &&
+                  createCategoryForm.get('name')?.touched
+                "
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="
+                  createCategoryForm.get('name')?.invalid &&
+                  createCategoryForm.get('name')?.touched
+                "
+              >
+                Name is required.
+              </div>
+            </div>
+            <label class="small text-muted mb-1 d-block">Image</label>
+            <div
+              class="d-flex align-items-center mb-2"
+              *ngIf="createCategoryPicture"
+            >
+              <div class="image-preview-card mr-2">
+                <img
+                  [src]="createCategoryPicture.src"
+                  [alt]="createCategoryPicture.alt"
+                />
+                <button
+                  type="button"
+                  class="remove-btn"
+                  (click)="removeCreateCategoryPicture()"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group mb-3">
+              <label
+                class="btn btn-outline-primary mb-0"
+                [class.disabled]="createCategoryPicture"
+              >
+                <i class="fas fa-upload"></i>
+                Choose image
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  hidden
+                  (change)="onCreateCategoryFileSelected($event)"
+                  [disabled]="createCategoryPicture"
+                />
+              </label>
+              <small class="text-muted d-block"
+                >JPG or PNG only, up to 5 MB. The image is stored only when you
+                save.</small
+              >
+            </div>
+            <button class="btn btn-success" type="submit" [disabled]="saving">
+              <span
+                *ngIf="saving"
+                class="spinner-border spinner-border-sm mr-1"
+              ></span
+              >Create
+            </button>
+          </form>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div
+          class="list-group list-group-flush position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <ng-container *ngFor="let c of categories">
+            <div
+              class="list-group-item d-flex align-items-center justify-content-between"
+              *ngIf="editingCategoryId !== c.id"
+              [class.bg-light]="!c.isActive"
+            >
+              <div class="d-flex align-items-center">
+                <img
+                  class="catalog-thumb mr-2"
+                  *ngIf="c.img?.src"
+                  [src]="c.img.src"
+                  [alt]="c.img.alt"
+                />
+                <span>{{ c.name }}</span>
+                <span class="badge badge-secondary ml-2" *ngIf="!c.isActive"
+                  >Deleted</span
+                >
+              </div>
+              <div class="text-nowrap">
+                <button
+                  class="btn btn-sm btn-outline-primary mr-1"
+                  (click)="startEditCategory(c)"
+                >
+                  <i class="fas fa-pen"></i>
+                </button>
+                <button
+                  class="btn btn-sm"
+                  [ngClass]="
+                    c.isActive ? 'btn-outline-danger' : 'btn-outline-success'
+                  "
+                  (click)="deleteCategory(c.id, c.name, c.isActive)"
+                >
+                  <i
+                    class="fas"
+                    [ngClass]="c.isActive ? 'fa-trash' : 'fa-undo'"
+                  ></i>
+                </button>
+              </div>
+            </div>
+            <div
+              class="list-group-item table-light"
+              *ngIf="editingCategoryId === c.id"
+            >
+              <form
+                [formGroup]="editCategoryForm"
+                (ngSubmit)="saveEditCategory()"
+                novalidate
+              >
+                <div class="form-group">
+                  <label class="small text-muted mb-1">Name</label>
+                  <input
+                    class="form-control"
+                    placeholder="Name"
+                    formControlName="name"
+                  />
+                </div>
+                <label class="small text-muted mb-1 d-block">Image</label>
+                <div
+                  class="d-flex align-items-center mb-2"
+                  *ngIf="editCategoryPicture"
+                >
+                  <div class="image-preview-card mr-2">
+                    <img
+                      [src]="editCategoryPicture.src"
+                      [alt]="editCategoryPicture.alt"
+                    />
+                    <button
+                      type="button"
+                      class="remove-btn"
+                      (click)="removeEditCategoryPicture()"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label
+                    class="btn btn-outline-primary mb-0"
+                    [class.disabled]="editCategoryPicture"
+                  >
+                    <i class="fas fa-upload"></i>
+                    Choose image
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      hidden
+                      (change)="onEditCategoryFileSelected($event)"
+                      [disabled]="editCategoryPicture"
+                    />
+                  </label>
+                  <small class="text-muted d-block"
+                    >JPG or PNG only, up to 5 MB. The image is stored only when
+                    you save.</small
+                  >
+                </div>
+                <button
+                  class="btn btn-sm btn-success mr-1"
+                  type="submit"
+                  [disabled]="saving"
+                >
+                  <span
+                    *ngIf="saving"
+                    class="spinner-border spinner-border-sm mr-1"
+                  ></span
+                  >Save
+                </button>
+                <button
+                  class="btn btn-sm btn-secondary"
+                  type="button"
+                  (click)="cancelEditCategory()"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </ng-container>
+          <div
+            class="list-group-item text-center text-muted"
+            *ngIf="categories.length === 0"
+          >
+            No categories found.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-tags text-primary mr-2"></i>Brands
+          </h5>
+          <button
+            class="btn btn-primary btn-sm"
+            (click)="toggleCreateBrandForm()"
+          >
+            <i
+              class="fas"
+              [ngClass]="showCreateBrandForm ? 'fa-times' : 'fa-plus'"
+            ></i>
+            {{ showCreateBrandForm ? " Cancel" : " Add brand" }}
+          </button>
+        </div>
+
+        <div class="card-body border-bottom" *ngIf="showCreateBrandForm">
+          <form
+            [formGroup]="createBrandForm"
+            (ngSubmit)="createBrand()"
+            novalidate
+          >
+            <div class="form-group">
+              <label class="small text-muted mb-1">Name</label>
+              <input
+                class="form-control"
+                placeholder="Name"
+                formControlName="name"
+                [class.is-invalid]="
+                  createBrandForm.get('name')?.invalid &&
+                  createBrandForm.get('name')?.touched
+                "
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="
+                  createBrandForm.get('name')?.invalid &&
+                  createBrandForm.get('name')?.touched
+                "
+              >
+                Name is required.
+              </div>
+            </div>
+            <label class="small text-muted mb-1 d-block">Image</label>
+            <div
+              class="d-flex align-items-center mb-2"
+              *ngIf="createBrandPicture"
+            >
+              <div class="image-preview-card mr-2">
+                <img
+                  [src]="createBrandPicture.src"
+                  [alt]="createBrandPicture.alt"
+                />
+                <button
+                  type="button"
+                  class="remove-btn"
+                  (click)="removeCreateBrandPicture()"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group mb-3">
+              <label
+                class="btn btn-outline-primary mb-0"
+                [class.disabled]="createBrandPicture"
+              >
+                <i class="fas fa-upload"></i>
+                Choose image
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  hidden
+                  (change)="onCreateBrandFileSelected($event)"
+                  [disabled]="createBrandPicture"
+                />
+              </label>
+              <small class="text-muted d-block"
+                >JPG or PNG only, up to 5 MB. The image is stored only when you
+                save.</small
+              >
+            </div>
+            <button class="btn btn-success" type="submit" [disabled]="saving">
+              <span
+                *ngIf="saving"
+                class="spinner-border spinner-border-sm mr-1"
+              ></span
+              >Create
+            </button>
+          </form>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div
+          class="list-group list-group-flush position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <ng-container *ngFor="let b of brands">
+            <div
+              class="list-group-item d-flex align-items-center justify-content-between"
+              *ngIf="editingBrandId !== b.id"
+              [class.bg-light]="!b.isActive"
+            >
+              <div class="d-flex align-items-center">
+                <img
+                  class="catalog-thumb mr-2"
+                  *ngIf="b.img?.src"
+                  [src]="b.img.src"
+                  [alt]="b.img.alt"
+                />
+                <span>{{ b.name }}</span>
+                <span class="badge badge-secondary ml-2" *ngIf="!b.isActive"
+                  >Deleted</span
+                >
+              </div>
+              <div class="text-nowrap">
+                <button
+                  class="btn btn-sm btn-outline-primary mr-1"
+                  (click)="startEditBrand(b)"
+                >
+                  <i class="fas fa-pen"></i>
+                </button>
+                <button
+                  class="btn btn-sm"
+                  [ngClass]="
+                    b.isActive ? 'btn-outline-danger' : 'btn-outline-success'
+                  "
+                  (click)="deleteBrand(b.id, b.name, b.isActive)"
+                >
+                  <i
+                    class="fas"
+                    [ngClass]="b.isActive ? 'fa-trash' : 'fa-undo'"
+                  ></i>
+                </button>
+              </div>
+            </div>
+            <div
+              class="list-group-item table-light"
+              *ngIf="editingBrandId === b.id"
+            >
+              <form
+                [formGroup]="editBrandForm"
+                (ngSubmit)="saveEditBrand()"
+                novalidate
+              >
+                <div class="form-group">
+                  <label class="small text-muted mb-1">Name</label>
+                  <input
+                    class="form-control"
+                    placeholder="Name"
+                    formControlName="name"
+                  />
+                </div>
+                <label class="small text-muted mb-1 d-block">Image</label>
+                <div
+                  class="d-flex align-items-center mb-2"
+                  *ngIf="editBrandPicture"
+                >
+                  <div class="image-preview-card mr-2">
+                    <img
+                      [src]="editBrandPicture.src"
+                      [alt]="editBrandPicture.alt"
+                    />
+                    <button
+                      type="button"
+                      class="remove-btn"
+                      (click)="removeEditBrandPicture()"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label
+                    class="btn btn-outline-primary mb-0"
+                    [class.disabled]="editBrandPicture"
+                  >
+                    <i class="fas fa-upload"></i>
+                    Choose image
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      hidden
+                      (change)="onEditBrandFileSelected($event)"
+                      [disabled]="editBrandPicture"
+                    />
+                  </label>
+                  <small class="text-muted d-block"
+                    >JPG or PNG only, up to 5 MB. The image is stored only when
+                    you save.</small
+                  >
+                </div>
+                <button
+                  class="btn btn-sm btn-success mr-1"
+                  type="submit"
+                  [disabled]="saving"
+                >
+                  <span
+                    *ngIf="saving"
+                    class="spinner-border spinner-border-sm mr-1"
+                  ></span
+                  >Save
+                </button>
+                <button
+                  class="btn btn-sm btn-secondary"
+                  type="button"
+                  (click)="cancelEditBrand()"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </ng-container>
+          <div
+            class="list-group-item text-center text-muted"
+            *ngIf="brands.length === 0"
+          >
+            No brands found.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace EShopper.DataAccess.Migrations
+{
+    public partial class UpdatedUserTable : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<int>(
+                name: "Role",
+                table: "Users",
+                type: "int",
+                nullable: false,
+                defaultValue: 2);
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "Role",
+                table: "Users");
+        }
+    }
+}

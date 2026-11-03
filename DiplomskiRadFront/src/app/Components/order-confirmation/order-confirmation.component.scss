@@ -1,0 +1,10 @@
+.invoice-item-thumb {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  max-width: none;
+  object-fit: contain;
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 3px;
+}

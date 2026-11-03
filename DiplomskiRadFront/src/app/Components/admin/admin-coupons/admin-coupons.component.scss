@@ -1,0 +1,18 @@
+.coupon-row {
+  cursor: pointer;
+}
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--primary);
+  }
+
+  i {
+    font-size: 0.8rem;
+    margin-left: 2px;
+  }
+}

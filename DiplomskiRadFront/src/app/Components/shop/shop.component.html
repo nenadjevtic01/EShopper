@@ -1,0 +1,211 @@
+<div class="container-fluid bg-secondary mb-5 page-header">
+  <div
+    class="d-flex flex-column align-items-center justify-content-center"
+    style="min-height: 300px"
+  >
+    <h1 class="font-weight-semi-bold text-uppercase mb-3">Our Shop</h1>
+    <div class="d-inline-flex">
+      <p class="m-0"><a routerLink="">Home</a></p>
+      <p class="m-0 px-2">-</p>
+      <p class="m-0">Shop</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap shop-wrap">
+  <div class="text-center py-5" *ngIf="!dataLoaded">
+    <span class="spinner-border text-primary"></span>
+  </div>
+
+  <div class="shop-layout" *ngIf="dataLoaded">
+    <aside class="filters" [class.open]="filtersOpen">
+      <div class="filters-head d-lg-none">
+        <h5 class="mb-0">Filters</h5>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary"
+          (click)="filtersOpen = false"
+        >
+          Close
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <h5 class="filter-title">Gender</h5>
+        <form>
+          <ng-container *ngFor="let g of genders">
+            <div class="custom-control custom-checkbox filter-option">
+              <input
+                type="checkbox"
+                [checked]="parseInt(genderChecked) == g.id"
+                (change)="toggleFilter('genders', g.id)"
+                class="custom-control-input"
+                id="gender{{ g.id }}"
+              />
+              <label class="custom-control-label" for="gender{{ g.id }}">{{
+                g.name
+              }}</label>
+            </div>
+          </ng-container>
+        </form>
+      </div>
+
+      <div class="filter-group">
+        <h5 class="filter-title">Brand</h5>
+        <form>
+          <ng-container *ngFor="let b of brands">
+            <div class="custom-control custom-checkbox filter-option">
+              <input
+                type="checkbox"
+                [checked]="parseInt(brandChecked) == b.id"
+                (change)="toggleFilter('brands', b.id)"
+                class="custom-control-input"
+                id="brand{{ b.id }}"
+              />
+              <label class="custom-control-label" for="brand{{ b.id }}">{{
+                b.name
+              }}</label>
+            </div>
+          </ng-container>
+        </form>
+      </div>
+
+      <div class="filter-group">
+        <h5 class="filter-title">Category</h5>
+        <form>
+          <ng-container *ngFor="let c of categories">
+            <div class="custom-control custom-checkbox filter-option">
+              <input
+                type="checkbox"
+                [checked]="parseInt(categoryChecked) == c.id"
+                (change)="toggleFilter('categories', c.id)"
+                class="custom-control-input"
+                id="category{{ c.id }}"
+              />
+              <label class="custom-control-label" for="category{{ c.id }}">{{
+                c.name
+              }}</label>
+            </div>
+          </ng-container>
+        </form>
+      </div>
+
+      <div class="filter-group">
+        <h5 class="filter-title">Size</h5>
+        <form class="size-options">
+          <ng-container *ngFor="let s of sizes">
+            <div class="custom-control custom-checkbox filter-option">
+              <input
+                type="checkbox"
+                (change)="toggleFilter('sizes', s.id)"
+                class="custom-control-input"
+                id="size{{ s.id }}"
+              />
+              <label class="custom-control-label" for="size{{ s.id }}">{{
+                s.name
+              }}</label>
+            </div>
+          </ng-container>
+        </form>
+      </div>
+
+      <div class="filter-group last">
+        <h5 class="filter-title">Availability</h5>
+        <div class="custom-control custom-checkbox filter-option">
+          <input
+            type="checkbox"
+            [(ngModel)]="includeNotInStock"
+            (ngModelChange)="onAvailabilityChange()"
+            class="custom-control-input"
+            id="includeNotInStock"
+          />
+          <label class="custom-control-label" for="includeNotInStock"
+            >Include not in stock/sold out</label
+          >
+        </div>
+      </div>
+    </aside>
+
+    <div class="shop-main">
+      <div class="toolbar">
+        <form class="toolbar-search" (submit)="$event.preventDefault()">
+          <i class="fa fa-search"></i>
+          <input
+            type="text"
+            [(ngModel)]="keyword"
+            (ngModelChange)="onKeyUp()"
+            name="keyword"
+            class="form-control"
+            placeholder="Search by name"
+          />
+        </form>
+        <button
+          type="button"
+          class="btn btn-outline-secondary toolbar-filter-btn d-lg-none"
+          (click)="filtersOpen = true"
+        >
+          <i class="fas fa-sliders-h mr-2"></i>Filters
+        </button>
+        <select
+          class="btn text-left toolbar-sort"
+          [(ngModel)]="sortOption"
+          (ngModelChange)="applySorting()"
+        >
+          <option [value]="0">Sort by</option>
+          <option [value]="1">Price ascending</option>
+          <option [value]="2">Price descending</option>
+          <option [value]="3">Name ascending</option>
+          <option [value]="4">Name descending</option>
+        </select>
+      </div>
+      <p class="result-count">
+        {{ totalCount }} {{ totalCount === 1 ? "product" : "products" }}
+      </p>
+
+      <div class="position-relative" [class.is-refreshing]="filtering">
+        <div class="refresh-overlay" *ngIf="filtering">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div class="product-grid-shop" *ngIf="displayedProducts.length > 0">
+          <app-product-card
+            *ngFor="let p of displayedProducts"
+            [product]="p"
+            [discount]="discountPercent(p)"
+          ></app-product-card>
+        </div>
+
+        <div
+          class="empty-state"
+          *ngIf="displayedProducts.length === 0 && !filtering"
+        >
+          <i class="fas fa-search"></i>
+          <h5>No products match your filters</h5>
+          <p class="text-muted mb-0">
+            Try removing a filter or searching for something else.
+          </p>
+        </div>
+
+        <nav aria-label="Page navigation" *ngIf="displayedProducts.length > 0">
+          <div class="pagination d-flex align-items-center">
+            <button
+              class="btn"
+              (click)="onPreviousPage()"
+              [disabled]="currentPage === 1"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>Previous
+            </button>
+            <span>Page {{ currentPage }} of {{ totalPages() }}</span>
+            <button
+              class="btn"
+              (click)="onNextPage()"
+              [disabled]="currentPage === totalPages()"
+            >
+              Next<i class="fas fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

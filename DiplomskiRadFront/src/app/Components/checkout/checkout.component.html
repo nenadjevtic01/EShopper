@@ -1,0 +1,319 @@
+<div class="container-fluid bg-secondary mb-5 page-header">
+  <div
+    class="d-flex flex-column align-items-center justify-content-center"
+    style="min-height: 300px"
+  >
+    <h1 class="font-weight-semi-bold text-uppercase mb-3">Checkout</h1>
+    <div class="d-inline-flex">
+      <p class="m-0"><a routerLink="/home">Home</a></p>
+      <p class="m-0 px-2">-</p>
+      <p class="m-0">Checkout</p>
+    </div>
+  </div>
+</div>
+
+<ng-container *ngIf="dataLoaded && userDataLoaded; else cartEmpty">
+  <div class="wrap" *ngIf="cart.items.length != 0; else cartEmpty">
+    <div class="checkout-grid">
+      <div class="checkout-form panel">
+        <h4 class="panel-title"><span class="step">1</span>Billing Details</h4>
+        <form [formGroup]="billingForm">
+          <div class="row">
+            <div class="col-md-6 form-group">
+              <label>First Name</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="firstName"
+                placeholder="John"
+                [class.is-invalid]="
+                  billingForm.get('firstName')?.invalid &&
+                  billingForm.get('firstName')?.touched
+                "
+              />
+              <div class="field-error text-danger">
+                <span
+                  *ngIf="
+                    billingForm.get('firstName')?.invalid &&
+                    billingForm.get('firstName')?.touched
+                  "
+                  >First name is required.</span
+                >
+              </div>
+            </div>
+            <div class="col-md-6 form-group">
+              <label>Last Name</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="lastName"
+                placeholder="Doe"
+                [class.is-invalid]="
+                  billingForm.get('lastName')?.invalid &&
+                  billingForm.get('lastName')?.touched
+                "
+              />
+              <div class="field-error text-danger">
+                <span
+                  *ngIf="
+                    billingForm.get('lastName')?.invalid &&
+                    billingForm.get('lastName')?.touched
+                  "
+                  >Last name is required.</span
+                >
+              </div>
+            </div>
+            <div class="col-md-12 form-group">
+              <label>E-mail</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="email"
+                placeholder="example@email.com"
+                maxlength="100"
+                [class.is-invalid]="
+                  billingForm.get('email')?.invalid &&
+                  billingForm.get('email')?.touched
+                "
+              />
+              <div class="field-error text-danger">
+                <span
+                  *ngIf="
+                    billingForm.get('email')?.invalid &&
+                    billingForm.get('email')?.touched
+                  "
+                  >{{
+                    billingForm.get("email")?.errors?.["maxlength"]
+                      ? "E-mail can have at most 100 characters."
+                      : "A valid e-mail is required."
+                  }}</span
+                >
+              </div>
+            </div>
+            <div class="col-md-12 form-group">
+              <label>Address Line 1</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="address"
+                placeholder="123 Street"
+                [class.is-invalid]="
+                  billingForm.get('address')?.invalid &&
+                  billingForm.get('address')?.touched
+                "
+              />
+              <div class="field-error text-danger">
+                <span
+                  *ngIf="
+                    billingForm.get('address')?.invalid &&
+                    billingForm.get('address')?.touched
+                  "
+                  >Address is required.</span
+                >
+              </div>
+            </div>
+            <div class="col-md-6 form-group">
+              <label>Country</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="country"
+                placeholder="United States"
+                [class.is-invalid]="
+                  billingForm.get('country')?.invalid &&
+                  billingForm.get('country')?.touched
+                "
+              />
+              <div class="field-error text-danger">
+                <span
+                  *ngIf="
+                    billingForm.get('country')?.invalid &&
+                    billingForm.get('country')?.touched
+                  "
+                  >Country is required.</span
+                >
+              </div>
+            </div>
+            <div class="col-md-6 form-group">
+              <label>City</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="city"
+                placeholder="New York"
+                [class.is-invalid]="
+                  billingForm.get('city')?.invalid &&
+                  billingForm.get('city')?.touched
+                "
+              />
+              <div class="field-error text-danger">
+                <span
+                  *ngIf="
+                    billingForm.get('city')?.invalid &&
+                    billingForm.get('city')?.touched
+                  "
+                  >City is required.</span
+                >
+              </div>
+            </div>
+            <div class="col-md-12 form-group">
+              <label>ZIP Code</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="postalCode"
+                placeholder="123"
+                [class.is-invalid]="
+                  billingForm.get('postalCode')?.invalid &&
+                  billingForm.get('postalCode')?.touched
+                "
+              />
+              <div class="field-error text-danger">
+                <span
+                  *ngIf="
+                    billingForm.get('postalCode')?.invalid &&
+                    billingForm.get('postalCode')?.touched
+                  "
+                  >Postal code is required.</span
+                >
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <h4 class="panel-title mt-4"><span class="step">2</span>Payment</h4>
+        <div class="pay-options">
+          <label
+            class="pay-option"
+            *ngFor="let pm of paymentMethods"
+            [class.is-selected]="paymentMethod === pm.id"
+            for="payment-{{ pm.id }}"
+          >
+            <input
+              type="radio"
+              [value]="pm.id"
+              [(ngModel)]="paymentMethod"
+              (ngModelChange)="checkDisabled()"
+              name="payment"
+              id="payment-{{ pm.id }}"
+            />
+            <span class="pay-radio"></span>
+            <span class="pay-name">{{ pm.name }}</span>
+          </label>
+        </div>
+      </div>
+
+      <aside class="checkout-summary">
+        <div class="summary-card">
+          <h4 class="summary-title">Order Total</h4>
+          <div class="order-items">
+            <div class="order-item" *ngFor="let c of cart.items">
+              <span class="order-thumb"
+                ><img
+                  *ngIf="c.picture"
+                  [src]="c.picture.src"
+                  [alt]="c.picture.alt"
+                /><span class="order-qty">{{ c.quantity }}</span></span
+              >
+              <span class="order-info">
+                <a routerLink="/product/{{ c.productId }}">{{
+                  c.productName
+                }}</a>
+                <small class="text-muted"
+                  >Size: {{ c.size }} &middot;
+                  {{ c.totalPrice / c.quantity | price }} each</small
+                >
+              </span>
+              <strong>{{ c.totalPrice | price }}</strong>
+            </div>
+          </div>
+
+          <div class="summary-line">
+            <span>Subtotal</span><strong>{{ cartTotal | price }}</strong>
+          </div>
+          <div class="summary-line">
+            <span>Shipping</span><strong>{{ shippingFee | price }}</strong>
+          </div>
+          <div class="summary-line text-success" *ngIf="couponApplied">
+            <span>Discount ({{ discountPercentage }}%)</span
+            ><strong class="text-success">-{{ discountAmount | price }}</strong>
+          </div>
+
+          <div class="coupon">
+            <label class="small text-muted mb-1">Coupon code</label>
+            <div class="input-group mb-1">
+              <input
+                class="form-control"
+                placeholder="Enter coupon code"
+                [(ngModel)]="couponCode"
+                [disabled]="couponApplied"
+                (keyup.enter)="applyCoupon()"
+              />
+              <div class="input-group-append">
+                <button
+                  class="btn btn-outline-primary"
+                  type="button"
+                  *ngIf="!couponApplied"
+                  [disabled]="applyingCoupon || !couponCode"
+                  (click)="applyCoupon()"
+                >
+                  <span
+                    class="spinner-border spinner-border-sm mr-1"
+                    *ngIf="applyingCoupon"
+                  ></span
+                  >Apply
+                </button>
+                <button
+                  class="btn btn-outline-danger"
+                  type="button"
+                  *ngIf="couponApplied"
+                  (click)="removeCoupon()"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+            <small
+              [class.text-success]="couponValid"
+              [class.text-danger]="!couponValid"
+              *ngIf="couponMessage"
+              >{{ couponMessage }}</small
+            >
+          </div>
+
+          <div class="summary-line summary-total">
+            <span>Total</span
+            ><strong>{{
+              cartTotal + shippingFee - discountAmount | price
+            }}</strong>
+          </div>
+          <button
+            [disabled]="!paymentChecked"
+            class="btn btn-lg btn-block btn-primary mt-3"
+            (click)="placeOrder()"
+          >
+            Place Order
+          </button>
+          <p
+            class="small text-muted text-center mt-3 mb-0"
+            *ngIf="!paymentChecked"
+          >
+            <i class="fas fa-info-circle mr-1"></i>Select a payment method to
+            place your order.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #cartEmpty>
+  <div class="wrap">
+    <div class="empty-block">
+      <h5 class="font-weight-semi-bold text-uppercase mb-3">
+        Checkout is impossible when cart is empty.
+      </h5>
+      <a routerLink="/shop" class="btn btn-primary">Shop now</a>
+    </div>
+  </div>
+</ng-template>

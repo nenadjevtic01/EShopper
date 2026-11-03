@@ -1,0 +1,161 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-credit-card text-primary mr-2"></i>Payment Methods
+          </h5>
+          <button class="btn btn-primary btn-sm" (click)="toggleCreateForm()">
+            <i
+              class="fas"
+              [ngClass]="showCreateForm ? 'fa-times' : 'fa-plus'"
+            ></i>
+            {{ showCreateForm ? " Cancel" : " Add payment method" }}
+          </button>
+        </div>
+
+        <div class="card-body border-bottom" *ngIf="showCreateForm">
+          <div class="form-group">
+            <label class="small text-muted mb-1">Name</label>
+            <input
+              class="form-control"
+              placeholder="e.g. Apple Pay"
+              [(ngModel)]="createName"
+            />
+          </div>
+          <button
+            class="btn btn-success"
+            [disabled]="creating"
+            (click)="createPaymentMethod()"
+          >
+            <span
+              *ngIf="creating"
+              class="spinner-border spinner-border-sm mr-1"
+            ></span
+            >Create
+          </button>
+        </div>
+
+        <div
+          class="card-body border-bottom d-flex flex-wrap align-items-center justify-content-between"
+        >
+          <p class="text-muted small mb-0">
+            Any active payment method here is immediately offered to customers
+            at checkout.
+          </p>
+          <div class="custom-control custom-checkbox mt-2 mt-md-0">
+            <input
+              type="checkbox"
+              class="custom-control-input"
+              id="includeInactivePaymentMethods"
+              [(ngModel)]="includeInactive"
+              (change)="load()"
+            />
+            <label
+              class="custom-control-label"
+              for="includeInactivePaymentMethods"
+              >Show deactivated methods</label
+            >
+          </div>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div
+          class="card-body"
+          *ngIf="dataLoaded && !loading && paymentMethods.length === 0"
+        >
+          <p class="text-muted mb-0">No payment methods yet.</p>
+        </div>
+
+        <div
+          class="table-responsive position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded && paymentMethods.length > 0"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="thead-light">
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let pm of paymentMethods">
+                <tr *ngIf="editingId !== pm.id" [class.bg-light]="!pm.isActive">
+                  <td>{{ pm.name }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [ngClass]="
+                        pm.isActive ? 'badge-success' : 'badge-secondary'
+                      "
+                      >{{ pm.isActive ? "Active" : "Inactive" }}</span
+                    >
+                  </td>
+                  <td class="text-right text-nowrap">
+                    <button
+                      class="btn btn-sm btn-outline-primary mr-1"
+                      (click)="startEdit(pm)"
+                    >
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm"
+                      [ngClass]="
+                        pm.isActive
+                          ? 'btn-outline-danger'
+                          : 'btn-outline-success'
+                      "
+                      (click)="toggleActive(pm)"
+                    >
+                      <i
+                        class="fas"
+                        [ngClass]="pm.isActive ? 'fa-ban' : 'fa-undo'"
+                      ></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="editingId === pm.id" class="table-light">
+                  <td colspan="3">
+                    <div class="py-2 d-flex align-items-center">
+                      <input class="form-control mr-2" [(ngModel)]="editName" />
+                      <button
+                        class="btn btn-sm btn-success mr-1 text-nowrap"
+                        [disabled]="saving"
+                        (click)="saveEdit()"
+                      >
+                        <span
+                          *ngIf="saving"
+                          class="spinner-border spinner-border-sm mr-1"
+                        ></span
+                        >Save
+                      </button>
+                      <button
+                        class="btn btn-sm btn-secondary text-nowrap"
+                        (click)="cancelEdit()"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

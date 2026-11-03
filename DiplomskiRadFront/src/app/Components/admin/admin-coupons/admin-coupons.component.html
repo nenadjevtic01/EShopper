@@ -1,0 +1,350 @@
+<app-admin-nav></app-admin-nav>
+
+<div class="container-fluid pb-5">
+  <div class="row px-xl-5">
+    <div class="col-12">
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header d-flex flex-wrap align-items-center justify-content-between bg-white"
+        >
+          <h5 class="mb-0">
+            <i class="fas fa-tags text-primary mr-2"></i>Coupons
+          </h5>
+          <button class="btn btn-primary btn-sm" (click)="toggleCreateForm()">
+            <i
+              class="fas"
+              [ngClass]="showCreateForm ? 'fa-times' : 'fa-plus'"
+            ></i>
+            {{ showCreateForm ? " Cancel" : " Add coupon" }}
+          </button>
+        </div>
+
+        <div class="card-body border-bottom" *ngIf="showCreateForm">
+          <form [formGroup]="createForm" (ngSubmit)="createCoupon()" novalidate>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label class="small text-muted mb-1">Code</label>
+                <input
+                  class="form-control text-uppercase"
+                  placeholder="e.g. SUMMER20"
+                  formControlName="code"
+                  [class.is-invalid]="
+                    createForm.get('code')?.invalid &&
+                    createForm.get('code')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('code')?.invalid &&
+                    createForm.get('code')?.touched
+                  "
+                >
+                  Code must be at least 3 characters.
+                </div>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small text-muted mb-1">Discount (%)</label>
+                <input
+                  class="form-control"
+                  type="number"
+                  min="1"
+                  max="100"
+                  formControlName="discountPercentage"
+                  [class.is-invalid]="
+                    createForm.get('discountPercentage')?.invalid &&
+                    createForm.get('discountPercentage')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('discountPercentage')?.invalid &&
+                    createForm.get('discountPercentage')?.touched
+                  "
+                >
+                  Enter a percentage between 1 and 100.
+                </div>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small text-muted mb-1">Valid until</label>
+                <input
+                  class="form-control"
+                  type="date"
+                  formControlName="validUntil"
+                  [class.is-invalid]="
+                    createForm.get('validUntil')?.invalid &&
+                    createForm.get('validUntil')?.touched
+                  "
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    createForm.get('validUntil')?.invalid &&
+                    createForm.get('validUntil')?.touched
+                  "
+                >
+                  Expiry date is required.
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-success" type="submit" [disabled]="creating">
+              <span
+                *ngIf="creating"
+                class="spinner-border spinner-border-sm mr-1"
+              ></span
+              >Create
+            </button>
+          </form>
+        </div>
+
+        <div
+          class="card-body border-bottom d-flex flex-wrap align-items-center justify-content-between"
+        >
+          <div class="input-group" style="max-width: 320px">
+            <input
+              class="form-control"
+              placeholder="Search by code"
+              [(ngModel)]="keyword"
+              (keyup.enter)="search()"
+            />
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" (click)="search()">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="custom-control custom-checkbox mt-2 mt-md-0">
+            <input
+              type="checkbox"
+              class="custom-control-input"
+              id="includeInactiveCoupons"
+              [(ngModel)]="includeInactive"
+              (change)="loadCoupons()"
+            />
+            <label class="custom-control-label" for="includeInactiveCoupons"
+              >Show deleted coupons</label
+            >
+          </div>
+        </div>
+
+        <div class="text-center py-5" *ngIf="loading && !dataLoaded">
+          <span class="spinner-border text-primary"></span>
+        </div>
+
+        <div
+          class="card-body"
+          *ngIf="dataLoaded && !loading && coupons.length === 0"
+        >
+          <p class="text-muted mb-0">No coupons yet.</p>
+        </div>
+
+        <div
+          class="table-responsive position-relative"
+          [class.is-refreshing]="loading && dataLoaded"
+          *ngIf="dataLoaded && coupons.length > 0"
+        >
+          <div class="refresh-overlay" *ngIf="loading">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="thead-light">
+              <tr>
+                <th></th>
+                <th>Code</th>
+                <th class="sortable-th" (click)="sortBy('discountPercentage')">
+                  Discount
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'discountPercentage'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th class="sortable-th" (click)="sortBy('validUntil')">
+                  Valid until
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'validUntil'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th class="sortable-th" (click)="sortBy('timesUsed')">
+                  Times used
+                  <i
+                    class="fas"
+                    [ngClass]="
+                      sortColumn !== 'timesUsed'
+                        ? 'fa-sort text-muted'
+                        : sortDirection === 'asc'
+                          ? 'fa-sort-up'
+                          : 'fa-sort-down'
+                    "
+                  ></i>
+                </th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let c of coupons">
+                <tr
+                  *ngIf="editingCouponId !== c.id"
+                  [class.bg-light]="!c.isActive"
+                  class="coupon-row"
+                  (click)="toggleExpand(c.id)"
+                >
+                  <td style="width: 24px">
+                    <i
+                      class="fas"
+                      [ngClass]="
+                        expandedCouponIds.has(c.id)
+                          ? 'fa-chevron-down'
+                          : 'fa-chevron-right'
+                      "
+                    ></i>
+                  </td>
+                  <td>
+                    {{ c.code }}
+                    <span class="badge badge-secondary ml-1" *ngIf="!c.isActive"
+                      >Deleted</span
+                    >
+                  </td>
+                  <td>{{ c.discountPercentage }}%</td>
+                  <td>{{ c.validUntil | date: "mediumDate" : "UTC" }}</td>
+                  <td>{{ c.timesUsed }}</td>
+                  <td class="text-right text-nowrap">
+                    <button
+                      class="btn btn-sm btn-outline-primary mr-1"
+                      (click)="$event.stopPropagation(); startEdit(c)"
+                    >
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm"
+                      [ngClass]="
+                        c.isActive
+                          ? 'btn-outline-danger'
+                          : 'btn-outline-success'
+                      "
+                      (click)="
+                        $event.stopPropagation();
+                        deleteCoupon(c.id, c.code, c.isActive)
+                      "
+                    >
+                      <i
+                        class="fas"
+                        [ngClass]="c.isActive ? 'fa-trash' : 'fa-undo'"
+                      ></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr
+                  *ngIf="
+                    editingCouponId !== c.id && expandedCouponIds.has(c.id)
+                  "
+                >
+                  <td colspan="6" class="bg-light">
+                    <p
+                      class="text-muted mb-0"
+                      *ngIf="!c.usages || c.usages.length === 0"
+                    >
+                      This coupon hasn't been used by anyone yet.
+                    </p>
+                    <table
+                      class="table table-sm mb-0"
+                      *ngIf="c.usages && c.usages.length > 0"
+                    >
+                      <thead>
+                        <tr>
+                          <th>User</th>
+                          <th>E-mail</th>
+                          <th>Order</th>
+                          <th>Used at</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let u of c.usages">
+                          <td>{{ u.userName }}</td>
+                          <td>{{ u.userEmail }}</td>
+                          <td>#{{ u.receiptId }}</td>
+                          <td>{{ u.usedAt | date: "medium" }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr *ngIf="editingCouponId === c.id" class="table-light">
+                  <td colspan="6">
+                    <form
+                      [formGroup]="editForm"
+                      (ngSubmit)="saveEdit()"
+                      class="form-row align-items-end py-2"
+                      novalidate
+                    >
+                      <div class="form-group col-md-3">
+                        <label class="small text-muted mb-1">Code</label>
+                        <input
+                          class="form-control text-uppercase"
+                          formControlName="code"
+                        />
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label class="small text-muted mb-1"
+                          >Discount (%)</label
+                        >
+                        <input
+                          class="form-control"
+                          type="number"
+                          min="1"
+                          max="100"
+                          formControlName="discountPercentage"
+                        />
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label class="small text-muted mb-1">Valid until</label>
+                        <input
+                          class="form-control"
+                          type="date"
+                          formControlName="validUntil"
+                        />
+                      </div>
+                      <div class="form-group col-md-3">
+                        <button
+                          class="btn btn-sm btn-success mr-1"
+                          type="submit"
+                          [disabled]="saving"
+                        >
+                          <span
+                            *ngIf="saving"
+                            class="spinner-border spinner-border-sm mr-1"
+                          ></span
+                          >Save
+                        </button>
+                        <button
+                          class="btn btn-sm btn-secondary"
+                          type="button"
+                          (click)="cancelEdit()"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

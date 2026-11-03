@@ -1,0 +1,83 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a routerLink="/home" class="footer-logo"
+          ><span class="brand-mark">E</span
+          ><span class="brand-word">Shopper</span></a
+        >
+        <p class="footer-about">
+          Everyday fashion with a modern edge. Quality pieces, delivered to your
+          door.
+        </p>
+        <div class="footer-social">
+          <a
+            href="https://www.facebook.com/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Facebook"
+            ><i class="fab fa-facebook-f"></i
+          ></a>
+          <a
+            href="https://www.instagram.com/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Instagram"
+            ><i class="fab fa-instagram"></i
+          ></a>
+          <a
+            href="https://www.twitter.com/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Twitter"
+            ><i class="fab fa-twitter"></i
+          ></a>
+          <a
+            href="https://www.youtube.com/"
+            target="_blank"
+            rel="noopener"
+            aria-label="YouTube"
+            ><i class="fab fa-youtube"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h5>Explore</h5>
+        <a routerLink="/home">Home</a>
+        <a routerLink="/shop">Our Shop</a>
+        <a routerLink="/about">About Us</a>
+        <a routerLink="/cart">Shopping Cart</a>
+        <a routerLink="/contact">Contact</a>
+      </div>
+
+      <div class="footer-col">
+        <h5>Get in touch</h5>
+        <p>
+          <i class="fas fa-map-marker-alt"></i>Zdravka Čelara br.16, 11000
+          Beograd
+        </p>
+        <p><i class="fas fa-envelope"></i>info@flex.com</p>
+        <p><i class="fas fa-phone-alt"></i>064/047-27-01</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>
+        &copy; <a routerLink="/home">E-shopper</a>. All rights reserved.
+        Designed by <b>Nenad Jevtic</b>
+      </p>
+      <img src="../../../assets/img/payments.png" alt="Accepted payments" />
+    </div>
+  </div>
+</footer>
+
+<button
+  (click)="scrollToTop()"
+  class="btn btn-primary back-to-top"
+  [class.visible]="showBackToTop"
+  [attr.tabindex]="showBackToTop ? 0 : -1"
+  aria-label="Back to top"
+>
+  <i class="fa fa-angle-up"></i>
+</button>
